@@ -69,12 +69,6 @@ open http://localhost:8123/chat.html
 ### Untuk Pengguna
 - 📘 **[PANDUAN.md](PANDUAN.md)** - Panduan lengkap dalam Bahasa Indonesia
 - ⚡ **[MULAI.md](MULAI.md)** - Quick start dan tips singkat
-
-### Untuk Developer
-- 🐳 **[DOCKER.md](DOCKER.md)** - Panduan deployment dengan Docker
-- 🔄 **[COMPARISON.md](COMPARISON.md)** - Perbandingan dengan TCD-AI-Chat
-- 📋 **[tasks/PROJECT_ROADMAP.md](tasks/PROJECT_ROADMAP.md)** - Roadmap pengembangan
-
 ---
 
 ## 🎨 Tema yang Tersedia
@@ -183,65 +177,6 @@ Ketik pertanyaan Anda di chat box dan AI akan menjawab!
 
 ---
 
-## 🔧 Konfigurasi
-
-### Environment Variables
-
-Copy `.env.example` ke `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Konfigurasi penting:
-
-```env
-# Aplikasi
-APP_NAME="Indonesia AI Agent"
-APP_ENV=production
-APP_DEBUG=false
-
-# Database
-DB_CONNECTION=sqlite
-DB_DATABASE=storage/database.sqlite
-
-# GitHub OAuth
-GITHUB_CLIENT_ID=your_client_id
-GITHUB_CLIENT_SECRET=your_client_secret
-```
-
-**90+ opsi konfigurasi** tersedia di `.env.example`
-
----
-
-## 🐳 Docker Deployment
-
-### Development
-
-```bash
-docker-compose up -d
-```
-
-### Production
-
-```bash
-# Dengan MySQL + Nginx + Redis
-docker-compose --profile mysql --profile cache --profile production up -d
-```
-
-### Backup Database
-
-```bash
-# SQLite
-cp storage/database.sqlite storage/backup_$(date +%Y%m%d).sqlite
-
-# MySQL
-docker-compose exec mysql mysqldump -u root -p indonesia_ai > backup.sql
-```
-
-**Panduan lengkap:** Lihat [DOCKER.md](DOCKER.md)
-
----
 
 ## 🧪 Testing
 
@@ -258,34 +193,6 @@ composer audit
 ```
 
 ---
-
-## 🚀 Deployment
-
-### Via Docker
-
-```bash
-# Build image
-docker build -t indonesia-ai-agent .
-
-# Push to registry
-docker tag indonesia-ai-agent yourusername/indonesia-ai-agent
-docker push yourusername/indonesia-ai-agent
-
-# Deploy
-docker-compose up -d
-```
-
-### Via CI/CD
-
-Push ke GitHub, pipeline otomatis akan:
-1. ✅ Cek kualitas kode
-2. ✅ Scan keamanan
-3. ✅ Build Docker image
-4. ✅ Deploy ke staging (branch `develop`)
-5. ✅ Deploy ke production (branch `main`)
-
----
-
 ## 📊 Struktur Project
 
 ```
