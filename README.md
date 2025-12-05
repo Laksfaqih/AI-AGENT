@@ -376,24 +376,6 @@ Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) unt
 
 ---
 
-## 👥 Tim
-
-**Indonesia AI Agent** dikembangkan oleh:
-
-- **Organisasi:** Indonesian Developers
-- **Website:** [indonesiasatu.com](https://indonesiasatu.com)
-- **Email:** support@indonesiasatu.com
-
----
-
-## ⭐ Support
-
-Jika proyek ini membantu Anda, berikan ⭐ di GitHub!
-
-**Ada pertanyaan?** Buka [Issues](https://github.com/yourusername/Agent-Ai/issues)
-
----
-
 <div align="center">
 
 **Dibuat dengan ❤️ untuk Pengembang Indonesia**
