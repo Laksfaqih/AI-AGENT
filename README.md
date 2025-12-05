@@ -1,4 +1,4 @@
-# 🇮🇩 Indonesia AI Agent
+# 🇮🇩 Laks AI Agent
 
 > **Agen AI Modern dengan Antarmuka Glassmorphism untuk Pengembang Indonesia**
 
