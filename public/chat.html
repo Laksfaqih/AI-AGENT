@@ -1,0 +1,3436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laks AI</title>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Leaflet.js for map visualization -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 100%;
+            margin: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            height: 80px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 36px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .status.connected {
+            background: rgba(72, 187, 120, 0.3);
+            color: #48bb78;
+            border: 1px solid #48bb78;
+        }
+
+        .status.disconnected {
+            background: rgba(245, 101, 101, 0.3);
+            color: #f56565;
+            border: 1px solid #f56565;
+        }
+
+        .chat-container {
+            background: transparent;
+            padding: 20px 30px 180px 30px;
+            overflow-y: auto;
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 18px 24px;
+            border-radius: 20px;
+            animation: fadeInUp 0.4s;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+            margin-left: 15vw;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant {
+            background: rgba(26, 32, 44, 0.9);
+            color: #e2e8f0;
+            margin-right: 15vw;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .message-role {
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message.user .message-role {
+            color: #667eea;
+        }
+
+        .message.assistant .message-role {
+            color: #9f7aea;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .message-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .message-actions button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .input-wrapper {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            padding: 0 30px;
+            align-items: center;
+            z-index: 1000;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 0;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-container:focus-within {
+            border-color: #fff;
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            color: #2d3748;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        input::placeholder {
+            color: #a0aec0;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #sendBtn {
+            white-space: nowrap;
+        }
+
+        .stats {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            opacity: 0.8;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            margin-top: 20px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-weight: 700;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-type-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .chart-type-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 320px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .map-container {
+            margin-top: 20px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .map-wrapper {
+            position: relative;
+            height: 450px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .map-wrapper .leaflet-container {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Dark theme for Leaflet popups */
+        .leaflet-popup-content-wrapper {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .leaflet-popup-tip {
+            background: #2d3748;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', Consolas, monospace;
+            font-size: 14px;
+            color: #9ae6b4;
+        }
+
+        .inline-code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: #f6ad55;
+        }
+
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.4s;
+            z-index: 10000;
+            font-weight: 500;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .model-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 11px;
+            margin-left: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger-btn {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 54px;
+            height: 54px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+
+        .hamburger-icon {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background: rgba(26, 32, 44, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            min-width: 240px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            color: #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-item.status-item {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .dropdown-item.status-item:hover {
+            background: transparent;
+        }
+
+        /* Settings Dropup Styles */
+        .settings-dropup {
+            position: relative;
+        }
+
+        .settings-dropup-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 15px;
+            background: rgba(26, 32, 44, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            min-width: 380px;
+            max-width: 420px;
+            z-index: 1000;
+            animation: slideUpFade 0.3s ease;
+            overflow: hidden;
+        }
+
+        .settings-dropup-menu.active {
+            display: block;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-dropup-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .settings-dropup-header h3 {
+            color: #fff;
+            font-size: 16px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .settings-dropup-content {
+            padding: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .settings-group {
+            margin-bottom: 25px;
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-group h4 {
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .settings-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+
+        .settings-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .settings-group select:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .settings-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .settings-actions button {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 12px;
+        }
+
+        /* Login Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .modal p {
+            color: #718096;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            color: #2d3748;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            color: #2d3748;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(245, 101, 101, 0.1);
+            color: #f56565;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info .username {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: rgba(245, 101, 101, 0.2);
+            border: 1px solid #f56565;
+            border-radius: 15px;
+            color: #f56565;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-logout:hover {
+            background: rgba(245, 101, 101, 0.3);
+        }
+
+        /* GitHub Auth Modal */
+        .github-auth-section {
+            margin-top: 25px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .github-auth-section h3 {
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .github-auth-section p {
+            color: #718096;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .device-code-display {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 18px 0;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+
+        .device-code {
+            font-size: 28px;
+            font-weight: 800;
+            color: #667eea;
+            letter-spacing: 4px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .auth-instructions {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 18px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .auth-instructions ol {
+            margin-left: 20px;
+            color: #2d3748;
+        }
+
+        .auth-instructions li {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .btn-github {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-github:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-github:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-status {
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .auth-status.checking {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .auth-status.success {
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .auth-status.error {
+            background: rgba(245, 101, 101, 0.1);
+            color: #f56565;
+        }
+
+        /* Database Modal */
+        .btn-small {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay active">
+        <div class="modal">
+            <h2>🔐 Welcome Back</h2>
+            <p>Login to access Laks AI Agent</p>
+
+            <div id="loginError" class="error-message" style="display: none;"></div>
+
+            <form id="loginForm" onsubmit="return handleLogin(event);" action="javascript:void(0);">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- GitHub Auth Modal (keeping same functionality with new styling) -->
+    <div id="githubAuthModal" class="modal-overlay">
+        <div class="modal">
+            <h2>🔗 AI Authentication</h2>
+            <p>Connect your GitHub account to use AI features</p>
+
+            <div id="githubAuthContent">
+                <div id="authStep1" class="github-auth-section">
+                    <h3>Step 1: Start Authentication</h3>
+                    <p>Click the button below to get your device code</p>
+                    <button class="btn-github" onclick="startGitHubAuth()" id="startAuthBtn">
+                        <span>🔐</span>
+                        <span>Authenticate with GitHub</span>
+                    </button>
+                </div>
+
+                <div id="authStep2" class="github-auth-section" style="display: none;">
+                    <h3>Step 2: Enter Device Code</h3>
+                    <div class="device-code-display">
+                        <div style="color: #718096; font-size: 12px; margin-bottom: 8px;">Your Device Code:</div>
+                        <div class="device-code" id="deviceCode">Loading...</div>
+                    </div>
+
+                    <div class="auth-instructions">
+                        <ol>
+                            <li>Copy the device code above</li>
+                            <li>Click the button below to open GitHub</li>
+                            <li>Paste the code and authorize the app</li>
+                            <li>Come back here and wait for confirmation</li>
+                        </ol>
+                    </div>
+
+                    <button class="btn-github" onclick="openGitHubAuth()" id="openGitHubBtn">
+                        <span>🌐</span>
+                        <span>Open GitHub Authorization Page</span>
+                    </button>
+
+                    <div id="authStatus" class="auth-status checking" style="display: none;">
+                        <span class="spinner"></span>
+                        Waiting for authorization...
+                    </div>
+                </div>
+
+                <div id="authStep3" class="github-auth-section" style="display: none;">
+                    <div class="auth-status success">
+                        ✅ Successfully authenticated with GitHub!
+                    </div>
+                    <button class="btn-github" onclick="closeGitHubAuthModal()">
+                        Continue to Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Connections Modal -->
+    <div id="databaseModal" class="modal-overlay">
+        <div class="modal" style="max-width: 950px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div>
+                    <h2 style="margin: 0;">🗄️ Database Connections</h2>
+                    <p style="margin: 8px 0 0 0;">Manage your PostgreSQL and MySQL connections</p>
+                </div>
+                <button class="btn-small" onclick="closeDatabaseModal()">✕ Close</button>
+            </div>
+
+            <!-- Connections List -->
+            <div id="connectionsList" style="margin-bottom: 25px; min-height: 120px;">
+                <div style="text-align: center; padding: 50px;">
+                    <div class="spinner" style="margin: 0 auto 15px;"></div>
+                    <div style="color: #718096;">Loading connections...</div>
+                </div>
+            </div>
+
+            <!-- Add Connection Button -->
+            <div id="addConnectionButton" style="margin-bottom: 25px;">
+                <button class="btn-github" onclick="showAddConnectionForm()">
+                    <span>➕</span>
+                    <span>Add New Connection</span>
+                </button>
+            </div>
+
+            <!-- Add Connection Form -->
+            <div id="addConnectionForm" style="display: none;">
+                <div style="background: #f7fafc; padding: 30px; border-radius: 15px; border: 2px solid #e2e8f0;">
+                    <h3 style="color: #2d3748; margin: 0 0 25px 0; font-size: 20px; font-weight: 700;">➕ Add Database
+                        Connection</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Database Type *</label>
+                            <select id="dbType" onchange="updatePortDefault()">
+                                <option value="postgres">PostgreSQL</option>
+                                <option value="mysql">MySQL</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Connection Name *</label>
+                            <input type="text" id="dbName" placeholder="e.g., Production DB">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Host *</label>
+                            <input type="text" id="dbHost" placeholder="localhost" value="localhost">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Port *</label>
+                            <input type="number" id="dbPort" value="5432">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Database Name *</label>
+                            <input type="text" id="dbDatabase" placeholder="postgres" value="postgres">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Username *</label>
+                            <input type="text" id="dbUsername" placeholder="postgres">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Password</label>
+                            <input type="password" id="dbPassword" placeholder="Leave empty if no password">
+                        </div>
+                    </div>
+
+                    <div
+                        style="margin-top: 25px; padding-top: 25px; border-top: 2px solid #e2e8f0; display: flex; gap: 12px;">
+                        <button id="testConnectionBtn" onclick="testNewConnection()" class="btn-github"
+                            style="flex: 1;">
+                            <span>🔌</span>
+                            <span>Test Connection</span>
+                        </button>
+                        <button id="saveConnectionBtn" onclick="saveConnection()" class="btn-github" style="flex: 1;">
+                            <span>💾</span>
+                            <span>Save Connection</span>
+                        </button>
+                        <button onclick="hideAddConnectionForm()" class="btn-small">Cancel</button>
+                    </div>
+
+                    <div id="connectionTestResult"
+                        style="display: none; margin-top: 18px; padding: 14px; border-radius: 12px; font-size: 14px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
+        <header>
+            <h1><span class="logo">🤖</span> Laks AI Agent</h1>
+            <div class="header-controls">
+                <div class="dropdown">
+                    <button class="dropdown-toggle" onclick="toggleUserDropdown()">
+                        <span>👤</span>
+                        <span id="displayUsername">User</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <div class="dropdown-item status-item" id="copilotStatus">
+                            <span>🔗</span>
+                            <span>Checking AI Agent...</span>
+                        </div>
+                        <div class="dropdown-item" onclick="showDatabaseModal()">
+                            <span>🗄️</span>
+                            <span>Databases</span>
+                        </div>
+                        <div class="dropdown-item" onclick="handleLogout()">
+                            <span>🚪</span>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="chat" class="chat-container">
+            <div class="message assistant">
+                <div class="message-header">
+                    <div class="message-role">Laks AI Agent</div>
+                    <div class="message-meta">Just now</div>
+                </div>
+                <div>Halo! 👋 Saya adalah <strong>Laks AI Agent</strong>, asisten AI cerdas yang siap membantu Anda
+                    menganalisis data, menjawab pertanyaan, dan memberikan wawasan mendalam. Ada yang bisa saya bantu
+                    hari ini?</div>
+            </div>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-container">
+                <input type="text" id="messageInput" placeholder="Type your message here..."
+                    onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" id="sendBtn">Send ✨</button>
+            </div>
+            <div class="settings-dropup">
+                <button class="hamburger-btn" onclick="toggleSettingsDropup()" title="Settings">
+                    <span class="hamburger-icon">⚙️</span>
+                </button>
+                <div class="settings-dropup-menu" id="settingsDropup">
+                    <div class="settings-dropup-header">
+                        <h3>⚙️ Settings</h3>
+                    </div>
+                    <div class="settings-dropup-content">
+                        <div class="settings-group">
+                            <h4>AI Model</h4>
+                            <label>Select the AI model to use</label>
+                            <select id="modelSelectPanel">
+                                <option value="">Loading models...</option>
+                            </select>
+                            <small
+                                style="color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 6px; display: block;">
+                                Note: AI may use different model versions
+                            </small>
+                        </div>
+
+                        <div class="settings-group">
+                            <h4>Temperature</h4>
+                            <label>Controls randomness (0 = focused, 1 = creative)</label>
+                            <select id="temperatureSelectPanel">
+                                <option value="0">0 (Focused)</option>
+                                <option value="0.1" selected>0.1 (Precise)</option>
+                                <option value="0.3">0.3 (Balanced)</option>
+                                <option value="0.7">0.7 (Creative)</option>
+                                <option value="1.0">1.0 (Very Creative)</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group">
+                            <h4>Max Tokens</h4>
+                            <label>Maximum response length</label>
+                            <select id="maxTokensSelectPanel">
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                                <option value="2000">2000</option>
+                                <option value="4096" selected>4096</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-group">
+                            <h4>Actions</h4>
+                            <div class="settings-actions">
+                                <button onclick="exportChat(); toggleSettingsDropup();">💾 Export</button>
+                                <button onclick="clearChat(); toggleSettingsDropup();"
+                                    style="background: rgba(245, 101, 101, 0.3); border-color: #f56565;">🗑️
+                                    Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <span>Messages: <strong id="messageCount">1</strong></span>
+            <span>|</span>
+            <span>History: <strong id="historyCount">0</strong></span>
+            <span>|</span>
+            <span>Model: <strong id="currentModel">Loading...</strong></span>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8123';
+        let conversationHistory = [];
+        let availableModels = [];
+        let messageCount = 1;
+        let currentUser = null;
+        let currentConversationId = null;
+
+        // Toggle settings panel
+        // Toggle settings dropup
+        function toggleSettingsDropup() {
+            const dropup = document.getElementById('settingsDropup');
+            dropup.classList.toggle('active');
+
+            // Close when clicking outside
+            if (dropup.classList.contains('active')) {
+                setTimeout(() => {
+                    document.addEventListener('click', closeSettingsDropupOnClickOutside);
+                }, 0);
+            }
+        }
+
+        function closeSettingsDropupOnClickOutside(event) {
+            const dropup = document.getElementById('settingsDropup');
+            const toggle = event.target.closest('.hamburger-btn');
+
+            if (!toggle && !event.target.closest('.settings-dropup-menu')) {
+                dropup.classList.remove('active');
+                document.removeEventListener('click', closeSettingsDropupOnClickOutside);
+            }
+        }
+
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+
+            // Close when clicking outside
+            if (dropdown.classList.contains('active')) {
+                setTimeout(() => {
+                    document.addEventListener('click', closeUserDropdownOnClickOutside);
+                }, 0);
+            }
+        }
+
+        function closeUserDropdownOnClickOutside(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const toggle = event.target.closest('.dropdown-toggle');
+
+            if (!toggle && !event.target.closest('.dropdown-menu')) {
+                dropdown.classList.remove('active');
+                document.removeEventListener('click', closeUserDropdownOnClickOutside);
+            }
+        }
+
+        // Sync settings from panel to main
+        document.addEventListener('DOMContentLoaded', () => {
+            const modelPanel = document.getElementById('modelSelectPanel');
+            const tempPanel = document.getElementById('temperatureSelectPanel');
+            const tokensPanel = document.getElementById('maxTokensSelectPanel');
+
+            if (modelPanel) {
+                modelPanel.addEventListener('change', (e) => {
+                    const mainSelect = document.getElementById('modelSelect');
+                    if (mainSelect) mainSelect.value = e.target.value;
+                    updateCurrentModel();
+                });
+            }
+
+            if (tempPanel) {
+                tempPanel.addEventListener('change', (e) => {
+                    const mainSelect = document.getElementById('temperatureSelect');
+                    if (mainSelect) mainSelect.value = e.target.value;
+                });
+            }
+
+            if (tokensPanel) {
+                tokensPanel.addEventListener('change', (e) => {
+                    const mainSelect = document.getElementById('maxTokensSelect');
+                    if (mainSelect) mainSelect.value = e.target.value;
+                });
+            }
+        });
+
+        // Toggle raw query visibility
+        function toggleQuery(queryId) {
+            const queryDiv = document.getElementById(queryId);
+            const toggleBtn = document.getElementById('toggle-' + queryId);
+
+            if (queryDiv.style.display === 'none') {
+                queryDiv.style.display = 'block';
+                toggleBtn.textContent = '▲ Hide Raw Query';
+            } else {
+                queryDiv.style.display = 'none';
+                toggleBtn.textContent = '▼ Show Raw Query';
+            }
+        }
+
+        // Copy query to clipboard
+        function copyQuery(queryId) {
+            const queryDiv = document.getElementById(queryId);
+            const queryText = queryDiv.querySelector('pre').textContent;
+
+            navigator.clipboard.writeText(queryText).then(() => {
+                showToast('Query copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy query', 'error');
+            });
+        }
+
+        // Toggle table visibility
+        function toggleTable(tableId) {
+            const tableDiv = document.getElementById(tableId);
+            const toggleBtn = document.getElementById('toggle-' + tableId);
+
+            if (tableDiv.style.display === 'none') {
+                tableDiv.style.display = 'block';
+                toggleBtn.textContent = '📋 Hide Table Data';
+            } else {
+                tableDiv.style.display = 'none';
+                toggleBtn.textContent = '📋 Show Table Data';
+            }
+        }
+
+        // Chart Management
+        let chartInstances = {};
+
+        // Generate chart from query results
+        function generateChart(chartId, data, chartType = 'bar') {
+            console.log('generateChart called:', chartId, 'Type:', chartType, 'Data rows:', data?.length);
+
+            const canvas = document.getElementById(chartId);
+            if (!canvas) {
+                console.error('Canvas not found:', chartId);
+                return;
+            }
+
+            console.log('Canvas found, creating chart...');
+
+            // Destroy existing chart if it exists
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            // Prepare data for chart
+            const chartData = prepareChartData(data, chartType);
+            console.log('Chart data prepared:', chartData);
+
+            // Create chart
+            try {
+                chartInstances[chartId] = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#d4d4d4',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#d4d4d4',
+                                borderColor: '#0e639c',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: chartType !== 'pie' && chartType !== 'doughnut' ? {
+                            x: {
+                                ticks: {
+                                    color: '#888',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: '#888',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        } : {}
+                    }
+                });
+                console.log('Chart created successfully:', chartId);
+            } catch (error) {
+                console.error('Error creating chart:', error);
+            }
+        }
+
+        // Prepare data for different chart types
+        function prepareChartData(rows, chartType) {
+            if (!rows || rows.length === 0) {
+                return {
+                    labels: [],
+                    datasets: []
+                };
+            }
+
+            const keys = Object.keys(rows[0]);
+            const labelKey = keys[0]; // First column as labels
+            const valueKeys = keys.slice(1); // Rest as values
+
+            // Generate colors
+            const colors = generateColors(valueKeys.length);
+
+            if (chartType === 'pie' || chartType === 'doughnut') {
+                // For pie/doughnut, use first value column
+                const valueKey = valueKeys[0] || keys[1];
+                return {
+                    labels: rows.map(row => row[labelKey]),
+                    datasets: [{
+                        data: rows.map(row => parseFloat(row[valueKey]) || 0),
+                        backgroundColor: generateColors(rows.length),
+                        borderColor: '#1e1e1e',
+                        borderWidth: 2
+                    }]
+                };
+            } else {
+                // For bar, line, etc.
+                return {
+                    labels: rows.map(row => row[labelKey]),
+                    datasets: valueKeys.map((key, index) => ({
+                        label: key,
+                        data: rows.map(row => parseFloat(row[key]) || 0),
+                        backgroundColor: colors[index] + '80', // Add transparency
+                        borderColor: colors[index],
+                        borderWidth: 2,
+                        tension: chartType === 'line' ? 0.4 : 0
+                    }))
+                };
+            }
+        }
+
+        // Generate colors for charts
+        function generateColors(count) {
+            const baseColors = [
+                '#0e639c', '#4ec9b0', '#ce9178', '#dcdcaa', '#c586c0',
+                '#9cdcfe', '#4fc1ff', '#f48771', '#b5cea8', '#d16969'
+            ];
+
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(baseColors[i % baseColors.length]);
+            }
+            return colors;
+        }
+
+        // Change chart type
+        function changeChartType(chartId, data, newType) {
+            generateChart(chartId, data, newType);
+
+            // Update active button
+            const container = document.getElementById(chartId).closest('.chart-container');
+            const buttons = container.querySelectorAll('.chart-type-btn');
+            buttons.forEach(btn => {
+                if (btn.dataset.type === newType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Map instances storage
+        const mapInstances = {};
+
+        // Detect if data contains geographic coordinates (backend handles geocoding)
+        function detectMapData(rows) {
+            if (!rows || rows.length === 0) return false;
+
+            const keys = Object.keys(rows[0]).map(k => k.toLowerCase());
+
+            // Check for latitude/longitude columns (added by backend geocoding)
+            const hasLat = keys.some(k =>
+                k === 'lat' || k === 'latitude' || k === 'lat_deg' ||
+                k.includes('latitude') || k.includes('_lat')
+            );
+            const hasLng = keys.some(k =>
+                k === 'lng' || k === 'lon' || k === 'long' || k === 'longitude' ||
+                k === 'lng_deg' || k === 'lon_deg' || k.includes('longitude') ||
+                k.includes('_lng') || k.includes('_lon')
+            );
+
+            if (!hasLat || !hasLng) return false;
+
+            // Verify that at least one row has valid coordinates
+            const latKey = Object.keys(rows[0]).find(k =>
+                keys[Object.keys(rows[0]).indexOf(k)] === keys.find(k =>
+                    k === 'lat' || k === 'latitude' || k === 'lat_deg' ||
+                    k.includes('latitude') || k.includes('_lat')
+                )
+            );
+            const lngKey = Object.keys(rows[0]).find(k =>
+                keys[Object.keys(rows[0]).indexOf(k)] === keys.find(k =>
+                    k === 'lng' || k === 'lon' || k === 'long' || k === 'longitude' ||
+                    k === 'lng_deg' || k === 'lon_deg' || k.includes('longitude') ||
+                    k.includes('_lng') || k.includes('_lon')
+                )
+            );
+
+            return rows.some(row => {
+                const lat = parseFloat(row[latKey]);
+                const lng = parseFloat(row[lngKey]);
+                return !isNaN(lat) && !isNaN(lng) &&
+                    lat >= -90 && lat <= 90 &&
+                    lng >= -180 && lng <= 180;
+            });
+        }
+
+        // Generate map visualization
+        function generateMap(mapId, data) {
+            console.log('=== generateMap START ===');
+            console.log('Map ID:', mapId);
+            console.log('Data rows:', data?.length);
+            console.log('Leaflet available:', typeof L !== 'undefined');
+
+            const mapDiv = document.getElementById(mapId);
+            if (!mapDiv) {
+                console.error('❌ Map div not found:', mapId);
+                console.log('Available elements:', document.querySelectorAll('[id^="chart-restore-"]'));
+                return;
+            }
+
+            console.log('✅ Map div found:', mapDiv);
+            console.log('Map div dimensions:', mapDiv.offsetWidth, 'x', mapDiv.offsetHeight);
+
+            // Destroy existing map if it exists
+            if (mapInstances[mapId]) {
+                console.log('Destroying existing map instance');
+                mapInstances[mapId].remove();
+                delete mapInstances[mapId];
+            }
+
+            // Find latitude and longitude columns (geocoded by backend)
+            const keys = Object.keys(data[0]);
+            const keysLower = keys.map(k => k.toLowerCase());
+            console.log('Data columns:', keys);
+
+            const latKey = keys.find((k, i) => {
+                const kl = keysLower[i];
+                return kl === 'lat' || kl === 'latitude' || kl === 'lat_deg' ||
+                    kl.includes('latitude') || kl.includes('_lat');
+            });
+            const lngKey = keys.find((k, i) => {
+                const kl = keysLower[i];
+                return kl === 'lng' || kl === 'lon' || kl === 'long' || kl === 'longitude' ||
+                    kl === 'lng_deg' || kl === 'lon_deg' || kl.includes('longitude') ||
+                    kl.includes('_lng') || kl.includes('_lon');
+            });
+
+            let markers = [];
+            let sumLat = 0, sumLng = 0, validCount = 0;
+
+            // Use lat/lng coordinates (geocoded by backend if needed)
+            if (latKey && lngKey) {
+                data.forEach((row, index) => {
+                    const lat = parseFloat(row[latKey]);
+                    const lng = parseFloat(row[lngKey]);
+
+                    if (!isNaN(lat) && !isNaN(lng) &&
+                        lat >= -90 && lat <= 90 &&
+                        lng >= -180 && lng <= 180) {
+                        sumLat += lat;
+                        sumLng += lng;
+                        validCount++;
+                        markers.push({ lat, lng, data: row, index });
+                    }
+                });
+            } else {
+                console.error('No latitude/longitude columns found. Backend should geocode location data.');
+                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #f48771;"><div>❌ No coordinates available</div></div>';
+                return;
+            }
+
+            if (validCount === 0) {
+                console.error('No valid coordinates found');
+                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #f48771;"><div>❌ Could not geocode any locations</div></div>';
+                return;
+            }
+
+            const centerLat = sumLat / validCount;
+            const centerLng = sumLng / validCount;
+
+            // Create map
+            const map = L.map(mapId).setView([centerLat, centerLng], 10);
+            mapInstances[mapId] = map;
+
+            // Add tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add markers
+            markers.forEach(marker => {
+                // Create popup content
+                let popupContent = '<div style="color: #1e1e1e;">';
+                popupContent += `<strong>Point ${marker.index + 1}</strong><br>`;
+
+                Object.keys(marker.data).forEach(key => {
+                    const value = marker.data[key];
+                    popupContent += `<strong>${key}:</strong> ${value}<br>`;
+                });
+
+                popupContent += '</div>';
+
+                // Add marker with popup
+                L.marker([marker.lat, marker.lng])
+                    .addTo(map)
+                    .bindPopup(popupContent);
+            });
+
+            // Fit bounds to show all markers
+            if (markers.length > 1) {
+                const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lng]));
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+
+            // Force map to recalculate size (fixes rendering issues)
+            setTimeout(() => {
+                map.invalidateSize();
+                console.log('Map size invalidated');
+            }, 100);
+
+            console.log('✅ Map created successfully:', mapId, 'with', markers.length, 'markers');
+            console.log('=== generateMap END ===');
+        }
+
+        // Detect if data is suitable for charting and determine best chart type
+        function detectChartType(rows) {
+            if (!rows || rows.length === 0) return null;
+            if (rows.length < 1) return null; // Need at least 1 row for maps
+
+            const keys = Object.keys(rows[0]);
+            if (keys.length < 2) return null; // Need at least 2 columns
+
+            // PRIORITY 1: Check for geographic data (latitude/longitude)
+            // Backend controls whether to add coordinates based on user intent
+            const hasLatLng = detectMapData(rows);
+            if (hasLatLng) {
+                return 'map'; // Geographic data → Map visualization
+            }
+
+            // For charts, need at least 2 rows
+            if (rows.length < 2) return null;
+
+            // Check if at least one column has numeric values
+            const hasNumeric = keys.some(key => {
+                return rows.some(row => !isNaN(parseFloat(row[key])));
+            });
+
+            if (!hasNumeric) return null;
+
+            // Determine best chart type based on data characteristics
+            const firstKey = keys[0];
+            const firstValues = rows.map(r => r[firstKey]);
+
+            // Check if first column looks like dates
+            const isTimeSeries = firstValues.some(v => {
+                return /\d{4}-\d{2}|\d{4}\/\d{2}|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec/i.test(v);
+            });
+
+            if (isTimeSeries) {
+                return 'line'; // Time series → Line chart
+            }
+
+            // For categorical data with few items, use pie
+            if (rows.length <= 10 && keys.length === 2) {
+                return 'pie'; // Small categorical → Pie chart
+            }
+
+            // Default to bar chart
+            return 'bar';
+        }
+
+        // Check if data is chartable (backward compatibility)
+        function isChartable(rows) {
+            return detectChartType(rows) !== null;
+        }
+
+        // Clean system context from message content (removes [SYSTEM CONTEXT:...] and [AI IDENTITY:...])
+        function cleanSystemContext(content) {
+            if (!content) return content;
+
+            // Remove [SYSTEM CONTEXT: ...] blocks
+            content = content.replace(/\s*\[SYSTEM CONTEXT:.*?\]/gs, '');
+
+            // Remove [AI IDENTITY: ...] blocks
+            content = content.replace(/\s*\[AI IDENTITY:.*?\]/gs, '');
+
+            return content.trim();
+        }
+
+        // Load conversation history from database
+        async function loadConversationHistory() {
+            try {
+                // Check if this is a fresh login (not a page refresh)
+                // We use sessionStorage to track if user just logged in
+                const justLoggedIn = sessionStorage.getItem('just_logged_in') === 'true';
+
+                // If just logged in, create new conversation and clear the flag
+                if (justLoggedIn) {
+                    sessionStorage.removeItem('just_logged_in');
+                    const response = await fetchWithAuth(`${API_URL}/api/conversation/current?new=true`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        currentConversationId = data.conversation_id;
+                        conversationHistory = [];
+                    }
+                    return;
+                }
+
+                // Otherwise, load existing conversation (for page refresh)
+                const response = await fetchWithAuth(`${API_URL}/api/conversation/current`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentConversationId = data.conversation_id;
+
+                    // Convert database messages to conversation history format
+                    conversationHistory = [];
+                    if (data.messages && data.messages.length > 0) {
+                        // Debug: Log messages before sorting
+                        console.log('Messages from DB (before sort):', data.messages.map(m => ({
+                            role: m.role,
+                            created_at_ms: m.created_at_ms,
+                            content: m.content?.substring(0, 50)
+                        })));
+
+                        // Messages already come sorted from DB (ORDER BY created_at_ms ASC)
+                        // But we'll ensure correct order by parsing timestamps properly
+                        const sortedMessages = data.messages.sort((a, b) => {
+                            const timeA = a.created_at_ms || a.created_at;
+                            const timeB = b.created_at_ms || b.created_at;
+
+                            // Parse timestamps: format is "YYYY-MM-DD HH:MM:SS.mmm" or "YYYY-MM-DD HH:MM:SS"
+                            // Replace space with T for ISO format, then parse
+                            const dateA = new Date(timeA.replace(' ', 'T'));
+                            const dateB = new Date(timeB.replace(' ', 'T'));
+
+                            // For debugging
+                            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+                                console.warn('Invalid date format:', { timeA, timeB });
+                            }
+
+                            const result = dateA.getTime() - dateB.getTime();
+
+                            // Debug: Log comparison
+                            if (Math.abs(result) < 1000) { // If less than 1 second apart
+                                console.log('Close timestamps:', {
+                                    roleA: a.role,
+                                    roleB: b.role,
+                                    timeA,
+                                    timeB,
+                                    dateA: dateA.getTime(),
+                                    dateB: dateB.getTime(),
+                                    diff: result
+                                });
+                            }
+
+                            return result;
+                        });
+
+                        console.log('Messages after sort:', sortedMessages.map(m => ({
+                            role: m.role,
+                            created_at_ms: m.created_at_ms,
+                            content: m.content?.substring(0, 50)
+                        })));
+
+                        sortedMessages.forEach(msg => {
+                            let metadata = null;
+                            let sqlQuery = null;
+                            let queryResults = null;
+
+                            // Parse metadata if it exists (stored as JSON string)
+                            if (msg.metadata) {
+                                try {
+                                    metadata = typeof msg.metadata === 'string'
+                                        ? JSON.parse(msg.metadata)
+                                        : msg.metadata;
+
+                                    // Debug: Log metadata structure
+                                    console.log('Parsed metadata for message:', metadata);
+
+                                    // Extract query_results from metadata
+                                    // Note: The database 'metadata' column stores what was 'metadata.extra' in backend
+                                    // So metadata.query_results is actually what was metadata.extra.query_results
+                                    if (metadata.query_results) {
+                                        queryResults = metadata.query_results;
+                                    } else if (metadata.extra?.query_results) {
+                                        queryResults = metadata.extra.query_results;
+                                    }
+                                } catch (e) {
+                                    console.error('Failed to parse metadata:', e, msg.metadata);
+                                }
+                            }
+
+                            // Extract SQL query from content if it's an assistant message
+                            if (msg.role === 'assistant' && msg.content) {
+                                const sqlMatch = msg.content.match(/```sql\s*\n?(.*?)\n?```/s);
+                                if (sqlMatch) {
+                                    sqlQuery = sqlMatch[1].trim();
+                                }
+                            }
+
+                            // Extract user_intent from metadata
+                            // Note: metadata column stores what was metadata['extra'] in backend
+                            let userIntent = null;
+                            if (metadata) {
+                                // Check both possible locations
+                                userIntent = metadata.user_intent || metadata.extra?.user_intent || null;
+                                console.log('Extracting user_intent for message:', userIntent);
+                            }
+
+                            conversationHistory.push({
+                                role: msg.role,
+                                content: cleanSystemContext(msg.content),  // Clean system context from stored messages
+                                sql_query: sqlQuery,
+                                query_results: queryResults,
+                                user_intent: userIntent,
+                                created_at: msg.created_at_ms || msg.created_at,
+                                created_at_ms: msg.created_at_ms,
+                                model: msg.model,
+                                total_tokens: msg.total_tokens,
+                                response_time: msg.response_time,
+                                temperature: msg.temperature,
+                                max_tokens: msg.max_tokens,
+                                database_context: metadata?.database_context || false
+                            });
+                        });
+                    }
+
+                    console.log('Loaded conversation from database:', conversationHistory.length, 'messages');
+                    console.log('Conversation history:', conversationHistory);
+                }
+            } catch (e) {
+                console.error('Failed to load conversation history:', e);
+                conversationHistory = [];
+            }
+        }
+
+        // Save conversation history is now handled by the backend
+        function saveConversationHistory() {
+            // No longer needed - database handles this
+            console.log('History saved to database automatically');
+        }
+
+        // Helper function to get session token
+        function getSessionToken() {
+            return localStorage.getItem('session_token');
+        }
+
+        // Helper function to make authenticated API calls
+        async function fetchWithAuth(url, options = {}) {
+            const sessionToken = getSessionToken();
+
+            if (sessionToken) {
+                options.headers = options.headers || {};
+                options.headers['X-Session-Token'] = sessionToken;
+            }
+            return fetch(url, options);
+        }
+
+        // Check if user is logged in on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const sessionToken = getSessionToken();
+
+            if (sessionToken) {
+                // Verify session with backend
+                try {
+                    const response = await fetchWithAuth(`${API_URL}/api/user/profile`);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        currentUser = data.user;
+                        showMainApp();
+                    } else {
+                        // Session expired, clear it
+                        localStorage.removeItem('session_token');
+                    }
+                } catch (error) {
+                    console.error('Failed to verify session:', error);
+                    localStorage.removeItem('session_token');
+                }
+            }
+        });
+
+        // Handle login
+        async function handleLogin(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+
+            // Hide previous errors
+            errorDiv.style.display = 'none';
+
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Save session token to localStorage
+                    localStorage.setItem('session_token', data.session_token);
+
+                    // Save user data
+                    currentUser = data.user;
+
+                    // Mark that user just logged in (for new conversation creation)
+                    sessionStorage.setItem('just_logged_in', 'true');
+
+                    // Show main app
+                    showMainApp();
+
+                    // Reset form
+                    document.getElementById('loginForm').reset();
+                    showToast('Login successful!', 'success');
+                } else {
+                    showLoginError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showLoginError('Connection error: ' + error.message);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+
+            return false; // Prevent form submission
+        }
+
+        // Show login error
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Show main app after login
+        function showMainApp() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('displayUsername').textContent = currentUser.username;
+
+            // Initialize app
+            init();
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetchWithAuth(`${API_URL}/api/logout`, {
+                        method: 'POST'
+                    });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+
+                localStorage.removeItem('session_token');
+                currentUser = null;
+
+                // Hide main app
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('loginModal').classList.add('active');
+
+                // Clear chat
+                clearChat();
+
+                showToast('Logged out successfully', 'success');
+            }
+        }
+
+        // Initialize app (called after successful login)
+        async function init() {
+            await loadModels();
+            await checkStatus();
+
+            // Load conversation history from database
+            await loadConversationHistory();
+
+            // Restore chat messages from history
+            if (conversationHistory.length > 0) {
+                restoreChatFromHistory();
+            }
+
+            document.getElementById('messageInput').focus();
+        }
+
+        // Restore chat messages from conversation history
+        function restoreChatFromHistory() {
+            const chat = document.getElementById('chat');
+            chat.innerHTML = ''; // Clear default message
+
+            conversationHistory.forEach((msg, index) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.role === 'user' ? 'user' : 'assistant'}`;
+
+                // Build content HTML
+                let contentHtml;
+                if (msg.role === 'assistant') {
+                    // Don't show SQL in main content if there are query results
+                    let displayContent = msg.content;
+                    if (msg.query_results && msg.query_results.success && msg.sql_query) {
+                        // Remove SQL block from display content
+                        displayContent = msg.content.replace(/```sql\s*\n?.*?\n?```/s, '').trim();
+                    }
+                    contentHtml = displayContent ? formatMessage(displayContent) : '';
+
+                    // If there are query results stored, rebuild the data table
+                    if (msg.query_results && msg.query_results.success) {
+                        // PRIORITY 1: Use AI's user_intent if available
+                        let bestChartType = null;
+                        if (msg.user_intent) {
+                            console.log('Restored user intent from DB:', msg.user_intent);
+                            if (msg.user_intent.wants_map) {
+                                bestChartType = 'map';
+                            } else if (msg.user_intent.wants_chart) {
+                                // Let detectChartType choose the best chart type (bar/line/pie)
+                                bestChartType = detectChartType(msg.query_results.rows);
+                                if (!bestChartType || bestChartType === 'map') {
+                                    bestChartType = 'bar'; // Default to bar chart if detection fails
+                                }
+                            } else if (msg.user_intent.wants_table) {
+                                bestChartType = null; // Force table view
+                            }
+                        } else {
+                            // FALLBACK: Use automatic detection if no user_intent
+                            bestChartType = detectChartType(msg.query_results.rows);
+                        }
+
+                        const chartId = 'chart-restore-' + index;
+
+                        contentHtml += '<div style="margin-top: 15px; padding: 15px; background: #1a472a; border-radius: 5px; border-left: 3px solid #4ec9b0;">';
+                        contentHtml += '<div style="font-weight: bold; margin-bottom: 15px;">📊 Query Results (' + msg.query_results.count + ' rows)</div>';
+
+                        // PRIORITY 1: Show visualization if data is chartable or mappable
+                        if (bestChartType && msg.query_results.count > 0) {
+                            if (bestChartType === 'map') {
+                                // Map visualization
+                                contentHtml += '<div class="map-container">';
+                                contentHtml += '<div class="chart-header">';
+                                contentHtml += '<div class="chart-title">🗺️ Map Visualization</div>';
+                                contentHtml += '</div>';
+                                contentHtml += '<div class="map-wrapper">';
+                                contentHtml += '<div id="' + chartId + '" style="height: 100%; width: 100%;"></div>';
+                                contentHtml += '</div>';
+                                contentHtml += '</div>';
+                            } else {
+                                // Determine chart icon and title
+                                let chartIcon = '📊';
+                                let chartTitle = 'Bar Chart';
+                                if (bestChartType === 'line') {
+                                    chartIcon = '📈';
+                                    chartTitle = 'Line Chart';
+                                } else if (bestChartType === 'pie') {
+                                    chartIcon = '🥧';
+                                    chartTitle = 'Pie Chart';
+                                }
+
+                                // Chart visualization (shown by default)
+                                contentHtml += '<div class="chart-container">';
+                                contentHtml += '<div class="chart-header">';
+                                contentHtml += '<div class="chart-title">' + chartIcon + ' ' + chartTitle + '</div>';
+                                contentHtml += '</div>';
+                                contentHtml += '<div class="chart-canvas-wrapper">';
+                                contentHtml += '<canvas id="' + chartId + '"></canvas>';
+                                contentHtml += '</div>';
+                                contentHtml += '</div>';
+                            }
+                        } else {
+                            // FALLBACK: Show table only if data is not chartable
+                        }
+
+                        // Show table (hidden if we have a visualization)
+                        if (msg.query_results.count > 0) {
+                            const tableStyle = bestChartType ? 'display: none;' : '';
+                            contentHtml += '<div style="overflow-x: auto; ' + tableStyle + '"><table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+
+                            // Table header
+                            const firstRow = msg.query_results.rows[0];
+                            contentHtml += '<thead><tr>';
+                            for (const key in firstRow) {
+                                contentHtml += '<th style="border: 1px solid #4ec9b0; padding: 8px; text-align: left; background: #2d5a3a;">' + key + '</th>';
+                            }
+                            contentHtml += '</tr></thead>';
+
+                            // Table body (limit to first 100 rows)
+                            contentHtml += '<tbody>';
+                            const displayRows = msg.query_results.rows.slice(0, 100);
+                            displayRows.forEach(row => {
+                                contentHtml += '<tr>';
+                                for (const key in row) {
+                                    const value = row[key] === null ? '<em>NULL</em>' : row[key];
+                                    contentHtml += '<td style="border: 1px solid #4ec9b0; padding: 8px;">' + value + '</td>';
+                                }
+                                contentHtml += '</tr>';
+                            });
+                            contentHtml += '</tbody></table></div>';
+
+                            if (msg.query_results.count > 100) {
+                                contentHtml += '<div style="margin-top: 10px; font-size: 11px; color: #888;">Showing first 100 of ' + msg.query_results.count + ' rows</div>';
+                            }
+                        } else {
+                            contentHtml += '<div style="color: #888;">No results found</div>';
+                        }
+
+                        // Add collapsible raw query section if SQL query is stored
+                        if (msg.sql_query) {
+                            const queryId = 'query-restore-' + index;
+                            contentHtml += '<div style="margin-top: 15px; border-top: 1px solid #2d5a3a; padding-top: 10px;">';
+                            contentHtml += '<div style="display: flex; gap: 10px;">';
+                            contentHtml += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">📋 Copy</button>';
+                            contentHtml += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">▼ Show Raw Query</button>';
+                            contentHtml += '</div>';
+                            contentHtml += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #1a1a1a; border-radius: 4px; border: 1px solid #2d5a3a;">';
+                            contentHtml += '<pre style="margin: 0; color: #4ec9b0; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + msg.sql_query.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                            contentHtml += '</div>';
+                            contentHtml += '</div>';
+                        }
+
+                        contentHtml += '</div>';
+                    }
+                } else {
+                    contentHtml = msg.content;
+                }
+
+                // Build metadata display for assistant messages
+                let metaHtml = '';
+                if (msg.role === 'assistant') {
+                    if (msg.response_time) {
+                        metaHtml += msg.response_time + 's ';
+                    }
+                    if (msg.model) {
+                        metaHtml += '<span class="model-badge">' + msg.model + '</span> ';
+                    }
+                    if (msg.total_tokens) {
+                        metaHtml += '<span class="model-badge">' + msg.total_tokens + ' tokens</span> ';
+                    }
+                    if (msg.database_context) {
+                        metaHtml += '<span class="model-badge" style="background: #1a472a; color: #4ec9b0;">🗄️ DB Context</span>';
+                    }
+                } else {
+                    // Format timestamp for user messages
+                    if (msg.created_at) {
+                        const date = new Date(msg.created_at);
+                        metaHtml = date.toLocaleString();
+                    } else {
+                        metaHtml = 'Previous session';
+                    }
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-role">${msg.role === 'user' ? 'You' : 'Laks AI Agent'}</div>
+                        <div class="message-meta">${metaHtml || 'Previous session'}</div>
+                    </div>
+                    <div class="message-content">${contentHtml}</div>
+                `;
+                chat.appendChild(messageDiv);
+
+                // Generate visualization if data is chartable or mappable
+                if (msg.role === 'assistant' && msg.query_results && msg.query_results.success) {
+                    // PRIORITY 1: Use AI's user_intent if available
+                    let bestChartType = null;
+                    if (msg.user_intent) {
+                        console.log('Rendering with user intent:', msg.user_intent);
+                        if (msg.user_intent.wants_map) {
+                            bestChartType = 'map';
+                        } else if (msg.user_intent.wants_chart) {
+                            // Let detectChartType choose the best chart type (bar/line/pie)
+                            bestChartType = detectChartType(msg.query_results.rows);
+                            if (!bestChartType || bestChartType === 'map') {
+                                bestChartType = 'bar'; // Default to bar chart if detection fails
+                            }
+                        } else if (msg.user_intent.wants_table) {
+                            bestChartType = null; // Force table view
+                        }
+                    } else {
+                        // FALLBACK: Use automatic detection if no user_intent
+                        bestChartType = detectChartType(msg.query_results.rows);
+                    }
+
+                    console.log('Restore message', index, '- Chart type:', bestChartType, 'Rows:', msg.query_results.rows?.length);
+
+                    if (bestChartType) {
+                        const chartId = 'chart-restore-' + index;
+
+                        // Wait for libraries to load (Leaflet for maps, Chart.js for charts)
+                        const waitForLibraries = () => {
+                            if (bestChartType === 'map') {
+                                // Wait for Leaflet
+                                if (typeof L === 'undefined') {
+                                    console.log('Waiting for Leaflet to load...');
+                                    setTimeout(waitForLibraries, 100);
+                                    return;
+                                }
+                                console.log('Leaflet loaded, generating map:', chartId);
+
+                                // Check if map div exists
+                                const mapDiv = document.getElementById(chartId);
+                                if (!mapDiv) {
+                                    console.error('Map div not found:', chartId);
+                                    return;
+                                }
+
+                                generateMap(chartId, msg.query_results.rows);
+                            } else {
+                                // Wait for Chart.js
+                                if (typeof Chart === 'undefined') {
+                                    console.log('Waiting for Chart.js to load...');
+                                    setTimeout(waitForLibraries, 100);
+                                    return;
+                                }
+                                console.log('Chart.js loaded, generating chart:', chartId);
+                                generateChart(chartId, msg.query_results.rows, bestChartType);
+                            }
+                        };
+
+                        setTimeout(waitForLibraries, 200);
+                    }
+                }
+            });
+
+            messageCount = conversationHistory.length + 1;
+            updateStats();
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Check API status
+        async function checkStatus() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/api/status`);
+                const data = await response.json();
+
+                // Check if user is logged in first
+                if (!data.logged_in) {
+                    const copilotStatus = document.getElementById('copilotStatus');
+                    if (copilotStatus) {
+                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">Not logged in</span>';
+                    }
+                    return;
+                }
+
+                // User is logged in, check GitHub authentication
+                const copilotStatus = document.getElementById('copilotStatus');
+
+                if (data.authenticated) {
+                    if (copilotStatus) {
+                        copilotStatus.innerHTML = '<span>✓</span><span style="color: #4ec9b0;">Connected to AI Agent</span>';
+                        copilotStatus.classList.add('status-item');
+                        copilotStatus.style.cursor = 'default';
+                        copilotStatus.onclick = null;
+                    }
+                } else {
+                    if (copilotStatus) {
+                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">Not Connected</span>';
+                        copilotStatus.style.cursor = 'pointer';
+                        copilotStatus.classList.remove('status-item');
+                        copilotStatus.onclick = () => {
+                            toggleUserDropdown();
+                            showGitHubAuthModal();
+                        };
+                    }
+
+                    // Show GitHub auth modal only if user is logged in
+                    showGitHubAuthModal();
+                }
+            } catch (error) {
+                console.error('Failed to check status:', error);
+                const copilotStatus = document.getElementById('copilotStatus');
+                if (copilotStatus) {
+                    copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">API Error</span>';
+                }
+                showToast('API server not running. Start with: php -S localhost:8123 -t public', 'error');
+            }
+        }
+
+        // GitHub Authentication Functions
+        let deviceCode = null;
+        let userCode = null;
+        let verificationUri = null;
+        let pollInterval = null;
+        let pollIntervalSeconds = 5;
+
+        function showGitHubAuthModal() {
+            document.getElementById('githubAuthModal').classList.add('active');
+        }
+
+        function closeGitHubAuthModal() {
+            document.getElementById('githubAuthModal').classList.remove('active');
+            // Reset to step 1
+            document.getElementById('authStep1').style.display = 'block';
+            document.getElementById('authStep2').style.display = 'none';
+            document.getElementById('authStep3').style.display = 'none';
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+        }
+
+        async function startGitHubAuth() {
+            const startBtn = document.getElementById('startAuthBtn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="spinner"></span><span>Starting...</span>';
+
+            try {
+                const response = await fetchWithAuth(`${API_URL}/api/auth/start`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    deviceCode = data.device_code;
+                    userCode = data.user_code;
+                    verificationUri = data.verification_uri;
+                    pollIntervalSeconds = data.interval || 5;
+
+                    // Show step 2
+                    document.getElementById('authStep1').style.display = 'none';
+                    document.getElementById('authStep2').style.display = 'block';
+                    document.getElementById('deviceCode').textContent = userCode;
+                    document.getElementById('authStatus').style.display = 'block';
+
+                    // Start polling for authorization after the interval delay
+                    setTimeout(() => {
+                        startPolling();
+                    }, pollIntervalSeconds * 1000);
+                } else {
+                    showToast('Failed to start authentication: ' + (data.error || 'Unknown error'), 'error');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<span>🔐</span><span>Authenticate with GitHub</span>';
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<span>🔐</span><span>Authenticate with GitHub</span>';
+            }
+        }
+
+        function openGitHubAuth() {
+            if (verificationUri) {
+                window.open(verificationUri, '_blank');
+            }
+        }
+
+        function startPolling() {
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetchWithAuth(`${API_URL}/api/auth/poll`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            device_code: deviceCode
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.success && data.authenticated) {
+                        // Authentication successful
+                        clearInterval(pollInterval);
+                        document.getElementById('authStep2').style.display = 'none';
+                        document.getElementById('authStep3').style.display = 'block';
+
+                        // Refresh status
+                        await checkStatus();
+                        showToast('Successfully authenticated with GitHub!', 'success');
+                    } else if (data.error === 'slow_down') {
+                        // GitHub wants us to slow down, increase interval
+                        clearInterval(pollInterval);
+                        pollIntervalSeconds += 5;
+                        console.log('Slowing down polling to', pollIntervalSeconds, 'seconds');
+                        startPolling(); // Restart with new interval
+                    } else if (data.error && data.error !== 'authorization_pending') {
+                        // Error occurred
+                        clearInterval(pollInterval);
+                        showToast('Authentication error: ' + data.error, 'error');
+                        closeGitHubAuthModal();
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, pollIntervalSeconds * 1000); // Use dynamic interval
+        }
+
+        // Load available models
+        async function loadModels() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/api/models`);
+                const data = await response.json();
+
+                availableModels = data.models;
+                const selectPanel = document.getElementById('modelSelectPanel');
+
+                if (selectPanel) {
+                    selectPanel.innerHTML = '';
+
+                    // Separate models into Unlimited and Premium
+                    const unlimitedModels = data.models.filter(model => model.pricing === 'free');
+                    const premiumModels = data.models.filter(model => model.pricing !== 'free');
+
+                    // Sort premium models by provider first, then by model name
+                    premiumModels.sort((a, b) => {
+                        // First compare by provider
+                        if (a.provider < b.provider) return -1;
+                        if (a.provider > b.provider) return 1;
+                        // If providers are equal, compare by model name
+                        if (a.name < b.name) return -1;
+                        if (a.name > b.name) return 1;
+                        return 0;
+                    });
+
+                    // Add Unlimited section
+                    if (unlimitedModels.length > 0) {
+                        const unlimitedGroup = document.createElement('optgroup');
+                        unlimitedGroup.label = 'Unlimited';
+
+                        unlimitedModels.forEach(model => {
+                            const optionText = `${model.provider} - ${model.name}`;
+                            const optionPanel = document.createElement('option');
+                            optionPanel.value = model.id;
+                            optionPanel.textContent = optionText;
+                            if (model.id === 'gpt-4o') optionPanel.selected = true;
+                            unlimitedGroup.appendChild(optionPanel);
+                        });
+
+                        selectPanel.appendChild(unlimitedGroup);
+                    }
+
+                    // Add Premium section
+                    if (premiumModels.length > 0) {
+                        const premiumGroup = document.createElement('optgroup');
+                        premiumGroup.label = 'Premium';
+
+                        premiumModels.forEach(model => {
+                            const optionText = `${model.provider} - ${model.name}`;
+                            const optionPanel = document.createElement('option');
+                            optionPanel.value = model.id;
+                            optionPanel.textContent = optionText;
+                            premiumGroup.appendChild(optionPanel);
+                        });
+
+                        selectPanel.appendChild(premiumGroup);
+                    }
+
+                    updateCurrentModel();
+                }
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                const selectPanel = document.getElementById('modelSelectPanel');
+                if (selectPanel) {
+                    selectPanel.innerHTML = '<option>Failed to load models</option>';
+                }
+            }
+        }
+
+        // Update current model display
+        function updateCurrentModel() {
+            const select = document.getElementById('modelSelectPanel');
+            if (select && select.value) {
+                const selectedModel = availableModels.find(m => m.id === select.value);
+                if (selectedModel) {
+                    const currentModelEl = document.getElementById('currentModel');
+                    if (currentModelEl) {
+                        currentModelEl.textContent = selectedModel.name;
+                    }
+                }
+            }
+        }
+
+        // Track if a message is being sent
+        let isSending = false;
+
+        // Send message to API
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            // Prevent sending if already sending or empty message
+            if (!message || isSending) return;
+
+            // Set sending flag
+            isSending = true;
+
+            // Get settings from panel (since main selects were removed)
+            const modelSelect = document.getElementById('modelSelectPanel');
+            const tempSelect = document.getElementById('temperatureSelectPanel');
+            const tokensSelect = document.getElementById('maxTokensSelectPanel');
+
+            const model = modelSelect ? modelSelect.value : 'gpt-4o';
+            const temperature = tempSelect ? parseFloat(tempSelect.value) : 0.1;
+            const maxTokens = tokensSelect ? parseInt(tokensSelect.value) : 4096;
+
+            // Add user message to chat
+            addMessage('user', message);
+            input.value = '';
+            messageCount++;
+            updateStats();
+
+            // Disable send button and input
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Thinking...';
+            input.disabled = true;
+
+            // Show loading
+            const loadingId = addMessage('assistant', '<div class="loading"><div class="spinner"></div> Laks AI Agent sedang berpikir...</div>', true);
+
+            try {
+                const startTime = Date.now();
+
+                // Add current date/time context to help AI with accurate answers
+                const now = new Date();
+                const dateContext = `\n\n[SYSTEM CONTEXT: Current date is ${now.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })} (${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}). Use this current date for any time-sensitive questions.]`;
+
+                // Add AI identity context
+                const identityContext = `\n\n[AI IDENTITY: You are "Laks AI Agent", an intelligent AI assistant developed by Faqih Nur Rahman. Your purpose is to help users analyze data, answer questions accurately, provide insights, and assist with database queries. You are friendly, professional, helpful, and always provide accurate information based on current context. When asked who you are, introduce yourself as "Laks AI Agent" and explain your capabilities. You communicate professionally in both Indonesian and English languages.]`;
+
+                const messageWithContext = message + dateContext + identityContext;
+
+                const response = await fetchWithAuth(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,  // Send original message without context
+                        system_context: dateContext + identityContext,  // Send context separately
+                        conversation_id: currentConversationId,
+                        history: conversationHistory,
+                        start_time: startTime,
+                        options: {
+                            model: model,
+                            temperature: temperature,
+                            max_tokens: maxTokens
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const responseTime = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                // Debug: Log the response to see what we're getting
+                console.log('API Response:', data);
+                console.log('Query Results:', data.query_results);
+
+                // Remove loading message
+                document.getElementById(loadingId).remove();
+
+                if (data.success && data.response.choices && data.response.choices[0]) {
+                    const assistantMessage = data.response.choices[0].message.content;
+                    const modelUsed = data.response.model || model;
+                    const tokens = data.response.usage?.total_tokens || 0;
+
+                    // Update conversation ID from response
+                    if (data.conversation_id) {
+                        currentConversationId = data.conversation_id;
+                    }
+
+                    // Extract SQL query from the message FIRST
+                    let sqlQuery = '';
+                    const sqlMatch = assistantMessage.match(/```sql\s*\n?(.*?)\n?```/s);
+                    if (sqlMatch) {
+                        sqlQuery = sqlMatch[1].trim();
+                    }
+
+                    // Update local conversation history (for context in next message)
+                    // For database queries, create a summary instead of including the SQL
+                    let historyContent = assistantMessage;
+
+                    // If there's a SQL query with results, create a descriptive summary
+                    if (data.database_context && data.query_results && data.query_results.success) {
+                        const columns = data.query_results.rows.length > 0 ? Object.keys(data.query_results.rows[0]) : [];
+                        historyContent = `I queried the database and returned ${data.query_results.count} rows with columns: ${columns.join(', ')}. The data shows information about ${message.toLowerCase()}.`;
+                    }
+
+                    conversationHistory.push({
+                        role: 'user',
+                        content: message
+                    });
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: historyContent,
+                        sql_query: sqlQuery || null,
+                        query_results: data.query_results ? {
+                            success: data.query_results.success,
+                            rows: data.query_results.rows,
+                            count: data.query_results.count
+                        } : null
+                    });
+
+                    // No need to save to localStorage - database is the source of truth
+                    console.log('Message saved to database with conversation_id:', currentConversationId);
+
+                    // Remove SQL code block from the message content since we'll show it in collapsible section
+                    let displayMessage = assistantMessage;
+                    if (data.query_results && data.query_results.success && sqlQuery) {
+                        displayMessage = assistantMessage.replace(/```sql\s*\n?.*?\n?```/s, '').trim();
+                    }
+
+                    // Add assistant message to chat (without SQL if there are query results)
+                    let messageContent = displayMessage ? formatMessage(displayMessage) : '';
+
+                    // If there are query results, add them to the message
+                    if (data.query_results && data.query_results.success) {
+                        // PRIORITY 1: Use AI's user_intent if available
+                        let bestChartType = null;
+                        if (data.user_intent) {
+                            console.log('User intent from AI:', data.user_intent);
+                            if (data.user_intent.wants_map) {
+                                bestChartType = 'map';
+                            } else if (data.user_intent.wants_chart) {
+                                // Let detectChartType choose the best chart type (bar/line/pie)
+                                bestChartType = detectChartType(data.query_results.rows);
+                                if (!bestChartType || bestChartType === 'map') {
+                                    bestChartType = 'bar'; // Default to bar chart if detection fails
+                                }
+                            } else if (data.user_intent.wants_table) {
+                                bestChartType = null; // Force table view
+                            }
+                        } else {
+                            // FALLBACK: Use automatic detection if no user_intent
+                            bestChartType = detectChartType(data.query_results.rows);
+                        }
+
+                        const chartId = 'chart-' + Date.now();
+                        const tableId = 'table-' + Date.now();
+
+                        console.log('Final visualization type:', bestChartType);
+
+                        messageContent += '<div style="margin-top: 15px; padding: 15px; background: #1a472a; border-radius: 5px; border-left: 3px solid #4ec9b0;">';
+                        messageContent += '<div style="font-weight: bold; margin-bottom: 15px;">📊 Query Results (' + data.query_results.count + ' rows)</div>';
+
+                        // PRIORITY 1: Show visualization if data is chartable or mappable
+                        if (bestChartType && data.query_results.count > 0) {
+                            if (bestChartType === 'map') {
+                                // Map visualization
+                                messageContent += '<div class="map-container">';
+                                messageContent += '<div class="chart-header">';
+                                messageContent += '<div class="chart-title">🗺️ Map Visualization</div>';
+                                messageContent += '</div>';
+                                messageContent += '<div class="map-wrapper">';
+                                messageContent += '<div id="' + chartId + '" style="height: 100%; width: 100%;"></div>';
+                                messageContent += '</div>';
+                                messageContent += '</div>';
+                            } else {
+                                // Determine chart icon and title
+                                let chartIcon = '📊';
+                                let chartTitle = 'Bar Chart';
+                                if (bestChartType === 'line') {
+                                    chartIcon = '📈';
+                                    chartTitle = 'Line Chart';
+                                } else if (bestChartType === 'pie') {
+                                    chartIcon = '🥧';
+                                    chartTitle = 'Pie Chart';
+                                }
+
+                                // Chart visualization (shown by default)
+                                messageContent += '<div class="chart-container">';
+                                messageContent += '<div class="chart-header">';
+                                messageContent += '<div class="chart-title">' + chartIcon + ' ' + chartTitle + '</div>';
+                                messageContent += '</div>';
+                                messageContent += '<div class="chart-canvas-wrapper">';
+                                messageContent += '<canvas id="' + chartId + '"></canvas>';
+                                messageContent += '</div>';
+                                messageContent += '</div>';
+                            }
+                        } else {
+                            // FALLBACK: Show table only if data is not chartable
+                            if (data.query_results.count > 0) {
+                                messageContent += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+
+                                // Table header
+                                const firstRow = data.query_results.rows[0];
+                                messageContent += '<thead><tr>';
+                                for (const key in firstRow) {
+                                    messageContent += '<th style="border: 1px solid #4ec9b0; padding: 8px; text-align: left; background: #2d5a3a;">' + key + '</th>';
+                                }
+                                messageContent += '</tr></thead>';
+
+                                // Table body (limit to first 100 rows)
+                                messageContent += '<tbody>';
+                                const displayRows = data.query_results.rows.slice(0, 100);
+                                displayRows.forEach(row => {
+                                    messageContent += '<tr>';
+                                    for (const key in row) {
+                                        const value = row[key] === null ? '<em>NULL</em>' : row[key];
+                                        messageContent += '<td style="border: 1px solid #4ec9b0; padding: 8px;">' + value + '</td>';
+                                    }
+                                    messageContent += '</tr>';
+                                });
+                                messageContent += '</tbody></table></div>';
+
+                                if (data.query_results.count > 100) {
+                                    messageContent += '<div style="margin-top: 10px; font-size: 11px; color: #888;">Showing first 100 of ' + data.query_results.count + ' rows</div>';
+                                }
+                            } else {
+                                messageContent += '<div style="color: #888;">No results found</div>';
+                            }
+                        }
+
+                        // Add collapsible raw query section
+                        if (sqlQuery) {
+                            const queryId = 'query-' + Date.now();
+                            messageContent += '<div style="margin-top: 15px; border-top: 1px solid #2d5a3a; padding-top: 10px;">';
+                            messageContent += '<div style="display: flex; gap: 10px;">';
+                            messageContent += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">📋 Copy</button>';
+                            messageContent += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">▼ Show Raw Query</button>';
+                            messageContent += '</div>';
+                            messageContent += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #1a1a1a; border-radius: 4px; border: 1px solid #2d5a3a;">';
+                            messageContent += '<pre style="margin: 0; color: #4ec9b0; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + sqlQuery.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                            messageContent += '</div>';
+                            messageContent += '</div>';
+                        }
+
+                        messageContent += '</div>';
+                    }
+
+                    const messageId = addMessage('assistant', messageContent);
+
+                    // Generate visualization if data is chartable or mappable
+                    if (data.query_results && data.query_results.success) {
+                        const bestChartType = detectChartType(data.query_results.rows);
+                        if (bestChartType) {
+                            if (bestChartType === 'map') {
+                                // Find map div instead of canvas
+                                const mapDiv = document.getElementById(messageId).querySelector('.map-wrapper > div');
+                                if (mapDiv) {
+                                    const mapId = mapDiv.id;
+                                    console.log('Generating map:', mapId);
+
+                                    // Wait for Leaflet to load
+                                    const waitForLeaflet = () => {
+                                        if (typeof L === 'undefined') {
+                                            setTimeout(waitForLeaflet, 100);
+                                            return;
+                                        }
+                                        generateMap(mapId, data.query_results.rows);
+                                    };
+
+                                    setTimeout(waitForLeaflet, 200);
+                                } else {
+                                    console.error('Map div not found for map generation');
+                                }
+                            } else {
+                                // Generate chart
+                                const chartId = document.getElementById(messageId).querySelector('canvas')?.id;
+                                if (chartId) {
+                                    console.log('Generating chart:', chartId, 'Type:', bestChartType);
+
+                                    // Wait for Chart.js to load
+                                    const waitForChart = () => {
+                                        if (typeof Chart === 'undefined') {
+                                            setTimeout(waitForChart, 100);
+                                            return;
+                                        }
+                                        generateChart(chartId, data.query_results.rows, bestChartType);
+                                    };
+
+                                    setTimeout(waitForChart, 200);
+                                } else {
+                                    console.error('Canvas not found for chart generation');
+                                }
+                            }
+                        }
+                    }
+
+                    // Add metadata
+                    const messageEl = document.getElementById(messageId);
+                    const metaDiv = messageEl.querySelector('.message-meta');
+                    let metaHtml = `${responseTime}s <span class="model-badge">${modelUsed}</span> <span class="model-badge">${tokens} tokens</span>`;
+                    if (data.database_context) {
+                        metaHtml += ' <span class="model-badge" style="background: #1a472a; color: #4ec9b0;">🗄️ DB Context</span>';
+                    }
+                    metaDiv.innerHTML = metaHtml;
+
+                    // Add copy button
+                    addMessageActions(messageId, assistantMessage);
+
+                    messageCount++;
+                    updateStats();
+                    showToast('Response received!', 'success');
+                } else {
+                    const errorMsg = data.error || data.message || 'Unknown error';
+
+                    // Check for Rate Limit error (429)
+                    if (errorMsg.includes('429') || errorMsg.includes('quota exceeded') || errorMsg.includes('Too Many Requests')) {
+                        const rateLimitError = `⏰ Rate Limit Exceeded\n\n` +
+                            `GitHub Copilot API quota telah tercapai untuk saat ini.\n\n` +
+                            `🔧 Solusi:\n` +
+                            `1. Tunggu 5-10 menit lalu coba lagi\n` +
+                            `2. Refresh GitHub token dengan: php auth.php\n` +
+                            `3. Periksa status quota di GitHub account Anda\n` +
+                            `4. Coba gunakan model AI yang berbeda\n\n` +
+                            `Rate limit akan reset otomatis dalam beberapa menit.`;
+                        addMessage('assistant', rateLimitError);
+                        showToast('⏰ Rate Limit - Tunggu 5-10 menit', 'error');
+                    }
+                    // Check for DNS resolution error
+                    else if (errorMsg.includes('Could not resolve host') || errorMsg.includes('api.githubcopilot.com')) {
+                        const dnsError = `❌ DNS Resolution Error\n\n` +
+                            `Cannot connect to api.githubcopilot.com\n\n` +
+                            `Quick fixes:\n` +
+                            `1. Flush DNS cache: sudo dscacheutil -flushcache\n` +
+                            `2. Change DNS to Google DNS (8.8.8.8)\n` +
+                            `3. Check your internet connection\n` +
+                            `4. Disable VPN if active\n\n` +
+                            `See DNS-FIX.md for detailed instructions.`;
+                        addMessage('assistant', dnsError);
+                        showToast('DNS Resolution Error - Check DNS-FIX.md', 'error');
+                    } else {
+                        addMessage('assistant', '❌ Error: ' + errorMsg);
+                        showToast('Error: ' + errorMsg, 'error');
+                    }
+                }
+            } catch (error) {
+                document.getElementById(loadingId).remove();
+                addMessage('assistant', '❌ Error: ' + error.message);
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                // Re-enable send button and input (always runs, even if there's an error)
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+                input.disabled = false;
+                input.focus(); // Return focus to input
+                isSending = false; // Reset sending flag
+            }
+        }
+
+        // Add message to chat
+        function addMessage(role, content, isLoading = false) {
+            const chat = document.getElementById('chat');
+            const messageId = 'msg-' + Date.now();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = `message ${role}`;
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="message-role">${role === 'user' ? 'You' : 'Laks AI Agent'}</div>
+                    <div class="message-meta">${isLoading ? '' : 'Just now'}</div>
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+
+            chat.appendChild(messageDiv);
+            chat.scrollTop = chat.scrollHeight;
+
+            return messageId;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(messageId, text) {
+            // Remove HTML formatting
+            const temp = document.createElement('div');
+            temp.innerHTML = text;
+            const plainText = temp.textContent || temp.innerText;
+
+            navigator.clipboard.writeText(plainText).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            }).catch(err => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+
+        // Format message (markdown-like formatting)
+        function formatMessage(text) {
+            // Format code blocks with language
+            text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
+            });
+
+            // Format inline code
+            text = text.replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+
+            // Format bold
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // Format italic
+            text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+            // Format line breaks
+            text = text.replace(/\n/g, '<br>');
+
+            return text;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Clear chat
+        async function clearChat() {
+            if (confirm('Clear all messages and start a new conversation?')) {
+                // Clear local state
+                conversationHistory = [];
+                messageCount = 1;
+                currentConversationId = null;
+
+                // Clear UI
+                document.getElementById('chat').innerHTML = `
+                    <div class="message assistant">
+                        <div class="message-header">
+                            <div class="message-role">Laks AI Agent</div>
+                            <div class="message-meta">Just now</div>
+                        </div>
+                        <div>Halo! 👋 Saya adalah <strong>Laks AI Agent</strong>, asisten AI cerdas yang siap membantu Anda menganalisis data, menjawab pertanyaan, dan memberikan wawasan mendalam. Ada yang bisa saya bantu hari ini?</div>
+                    </div>
+                `;
+                updateStats();
+                showToast('New conversation started', 'success');
+            }
+        }
+
+        // Export chat
+        function exportChat() {
+            const messages = conversationHistory.map(msg => {
+                return `${msg.role.toUpperCase()}: ${msg.content}`;
+            }).join('\n\n---\n\n');
+
+            const blob = new Blob([messages], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `copilot-chat-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Chat exported!', 'success');
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('messageCount').textContent = messageCount;
+            document.getElementById('historyCount').textContent = conversationHistory.length;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+
+            if (type === 'error') {
+                toast.style.background = '#5a1d1d';
+            } else if (type === 'success') {
+                toast.style.background = '#1a472a';
+            }
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Database Management Functions
+        let currentConnections = [];
+
+        function showDatabaseModal() {
+            document.getElementById('databaseModal').classList.add('active');
+            loadConnections();
+        }
+
+        function closeDatabaseModal() {
+            document.getElementById('databaseModal').classList.remove('active');
+            hideAddConnectionForm();
+        }
+
+        function showAddConnectionForm() {
+            document.getElementById('addConnectionForm').style.display = 'block';
+        }
+
+        function updatePortDefault() {
+            const dbType = document.getElementById('dbType').value;
+            const portInput = document.getElementById('dbPort');
+            const databaseInput = document.getElementById('dbDatabase');
+
+            if (dbType === 'postgres') {
+                portInput.value = '5432';
+                if (!databaseInput.value || databaseInput.value === 'mysql') {
+                    databaseInput.value = 'postgres';
+                }
+            } else if (dbType === 'mysql') {
+                portInput.value = '3306';
+                if (!databaseInput.value || databaseInput.value === 'postgres') {
+                    databaseInput.value = 'mysql';
+                }
+            }
+        }
+
+        function hideAddConnectionForm() {
+            document.getElementById('addConnectionForm').style.display = 'none';
+            document.getElementById('connectionTestResult').style.display = 'none';
+            // Clear form
+            document.getElementById('dbType').value = 'postgres';
+            document.getElementById('dbName').value = '';
+            document.getElementById('dbHost').value = 'localhost';
+            document.getElementById('dbPort').value = '5432';
+            document.getElementById('dbDatabase').value = 'postgres';
+            document.getElementById('dbUsername').value = '';
+            document.getElementById('dbPassword').value = '';
+        }
+
+        async function loadConnections() {
+            try {
+                // Load both PostgreSQL and MySQL connections
+                const [postgresResponse, mysqlResponse] = await Promise.all([
+                    fetchWithAuth(`${API_URL}/api/postgres/connections`),
+                    fetchWithAuth(`${API_URL}/api/mysql/connections`)
+                ]);
+
+                const postgresData = await postgresResponse.json();
+                const mysqlData = await mysqlResponse.json();
+
+                let allConnections = [];
+
+                if (postgresData.success) {
+                    // Add type to each connection
+                    allConnections = allConnections.concat(
+                        postgresData.connections.map(conn => ({ ...conn, type: 'postgres' }))
+                    );
+                }
+
+                if (mysqlData.success) {
+                    // Add type to each connection
+                    allConnections = allConnections.concat(
+                        mysqlData.connections.map(conn => ({ ...conn, type: 'mysql' }))
+                    );
+                }
+
+                currentConnections = allConnections;
+                displayConnections(allConnections);
+            } catch (error) {
+                console.error('Failed to load connections:', error);
+                document.getElementById('connectionsList').innerHTML =
+                    '<div style="text-align: center; padding: 20px; color: #f48771;">Error loading connections</div>';
+            }
+        }
+
+        function displayConnections(connections) {
+            const container = document.getElementById('connectionsList');
+
+            if (connections.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; background: #2d2d30; border-radius: 8px; border: 2px dashed #555;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">🗄️</div>
+                        <div style="color: #888; font-size: 16px; margin-bottom: 5px;">No database connections yet</div>
+                        <div style="color: #666; font-size: 13px;">Click "Add New Connection" below to get started</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 12px;">';
+            connections.forEach(conn => {
+                const statusColor = conn.is_active ? '#4ec9b0' : '#888';
+                const dbTypeLabel = conn.type === 'postgres' ? 'PostgreSQL' : 'MySQL';
+                const dbTypeColor = conn.type === 'postgres' ? '#336791' : '#00758f';
+                html += `
+                    <div style="background: #2d2d30; padding: 20px; border-radius: 8px; border: 1px solid #555; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#0e639c'" onmouseout="this.style.borderColor='#555'">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <div style="font-size: 18px; font-weight: 600; color: ${statusColor};">${conn.name}</div>
+                                    <div style="background: ${conn.is_active ? '#1a472a' : '#3c3c3c'}; color: ${statusColor}; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">
+                                        ${conn.is_active ? '● Active' : '○ Inactive'}
+                                    </div>
+                                    <div style="background: ${dbTypeColor}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">
+                                        ${dbTypeLabel}
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 13px; color: #888;">
+                                    <div style="color: #666;">Database:</div>
+                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.database}</div>
+                                    <div style="color: #666;">Host:</div>
+                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.host}:${conn.port}</div>
+                                    <div style="color: #666;">Username:</div>
+                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.username}</div>
+                                    <div style="color: #666;">Created:</div>
+                                    <div style="color: #888;">${new Date(conn.created_at).toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-left: 20px;">
+                                <button class="btn-small" onclick="testConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #0e639c; color: white; border: none;">
+                                    🔌 Test
+                                </button>
+                                <button class="btn-small" onclick="deleteConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #5a1d1d; color: #f48771; border: none;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+        }
+
+        async function testNewConnection() {
+            const dbType = document.getElementById('dbType').value;
+            const name = document.getElementById('dbName').value.trim();
+            const host = document.getElementById('dbHost').value.trim();
+            const port = parseInt(document.getElementById('dbPort').value);
+            const database = document.getElementById('dbDatabase').value.trim();
+            const username = document.getElementById('dbUsername').value.trim();
+            const password = document.getElementById('dbPassword').value; // Can be empty
+
+            if (!host || !database || !username) {
+                showConnectionTestResult('Please fill in Host, Database, and Username', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('testConnectionBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span><span>Testing...</span>';
+
+            showConnectionTestResult('Testing connection...', 'info');
+
+            const apiEndpoint = dbType === 'postgres' ? '/api/postgres' : '/api/mysql';
+
+            try {
+                // First save temporarily to test
+                const response = await fetchWithAuth(`${API_URL}${apiEndpoint}/connections`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name || 'Test Connection',
+                        host, port, database, username, password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Test the connection
+                    const testResponse = await fetchWithAuth(`${API_URL}${apiEndpoint}/test`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ connection_id: data.connection_id })
+                    });
+
+                    const testData = await testResponse.json();
+
+                    // Delete the temporary connection if name was not provided
+                    if (!name) {
+                        await fetchWithAuth(`${API_URL}${apiEndpoint}/connection`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ connection_id: data.connection_id })
+                        });
+                    }
+
+                    if (testData.success) {
+                        showConnectionTestResult('✓ Connection successful! You can now save this connection.', 'success');
+                    } else {
+                        showConnectionTestResult('✗ Connection failed: ' + testData.message, 'error');
+                    }
+                } else {
+                    showConnectionTestResult('Error: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showConnectionTestResult('Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function showConnectionTestResult(message, type) {
+            const resultDiv = document.getElementById('connectionTestResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = message;
+
+            if (type === 'success') {
+                resultDiv.style.background = '#1a472a';
+                resultDiv.style.color = '#4ec9b0';
+                resultDiv.style.borderLeft = '3px solid #4ec9b0';
+            } else if (type === 'error') {
+                resultDiv.style.background = '#5a1d1d';
+                resultDiv.style.color = '#f48771';
+                resultDiv.style.borderLeft = '3px solid #f48771';
+            } else {
+                resultDiv.style.background = '#3c3c3c';
+                resultDiv.style.color = '#d4d4d4';
+                resultDiv.style.borderLeft = '3px solid #0e639c';
+            }
+        }
+
+        async function saveConnection() {
+            const dbType = document.getElementById('dbType').value;
+            const name = document.getElementById('dbName').value.trim();
+            const host = document.getElementById('dbHost').value.trim();
+            const port = parseInt(document.getElementById('dbPort').value);
+            const database = document.getElementById('dbDatabase').value.trim();
+            const username = document.getElementById('dbUsername').value.trim();
+            const password = document.getElementById('dbPassword').value; // Can be empty
+
+            if (!name || !host || !database || !username) {
+                showConnectionTestResult('Please fill in all required fields (*)', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('saveConnectionBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span><span>Saving...</span>';
+
+            const apiEndpoint = dbType === 'postgres' ? '/api/postgres' : '/api/mysql';
+
+            try {
+                const response = await fetchWithAuth(`${API_URL}${apiEndpoint}/connections`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name, host, port, database, username, password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('✓ Connection saved successfully!', 'success');
+                    hideAddConnectionForm();
+                    loadConnections();
+                } else {
+                    showConnectionTestResult('Failed to save: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showConnectionTestResult('Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function testConnection(connectionId, dbType) {
+            const apiEndpoint = dbType === 'postgres' ? '/api/postgres' : '/api/mysql';
+
+            try {
+                const response = await fetchWithAuth(`${API_URL}${apiEndpoint}/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ connection_id: connectionId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('✓ Connection successful!', 'success');
+                } else {
+                    showToast('✗ Connection failed: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteConnection(connectionId, dbType) {
+            if (!confirm('Are you sure you want to delete this connection?')) {
+                return;
+            }
+
+            const apiEndpoint = dbType === 'postgres' ? '/api/postgres' : '/api/mysql';
+
+            try {
+                const response = await fetchWithAuth(`${API_URL}${apiEndpoint}/connection`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ connection_id: connectionId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Connection deleted', 'success');
+                    loadConnections();
+                } else {
+                    showToast('Failed to delete connection', 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Update model when selection changes
+        document.getElementById('modelSelect').addEventListener('change', updateCurrentModel);
+    </script>
+</body>
+
+</html>

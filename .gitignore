@@ -1,0 +1,8 @@
+/vendor/
+/storage/*.json
+composer.lock
+.env
+.DS_Store
+*.log
+*.sqlite*
+opencode.json

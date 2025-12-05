@@ -1,0 +1,70 @@
+# Docker ignore file for Indonesia AI Agent
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+tasks/
+
+# Development files
+.env.example
+.editorconfig
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Composer
+composer.phar
+
+# Database (will be mounted as volume)
+storage/database.sqlite*
+storage/*.db
+
+# Logs
+storage/logs/
+*.log
+
+# Cache
+storage/cache/
+storage/framework/cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+docker-compose.override.yml
+docker/
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build artifacts
+dist/
+build/

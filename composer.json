@@ -1,0 +1,28 @@
+{
+    "name": "indonesiasatu/ai-agent",
+    "description": "Indonesia AI Agent - Smart AI Chat Application",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Indonesia Development Team",
+            "email": "hello@indonesiasatu.com",
+            "homepage": "https://indonesiasatu.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpCopilot\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # Indonesia AI Agent Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: indonesia-ai-agent
+    restart: unless-stopped
+    ports:
+      - "8123:8080"
+    environment:
+      - APP_NAME=Indonesia AI Agent
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost:8123}
+      - DB_CONNECTION=${DB_CONNECTION:-sqlite}
+      - DB_DATABASE=${DB_DATABASE:-/var/www/html/storage/database.sqlite}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+      - SESSION_LIFETIME=${SESSION_LIFETIME:-120}
+    volumes:
+      # Persist database
+      - ./storage:/var/www/html/storage
+      # Mount source code for development (comment out for production)
+      # - ./public:/var/www/html/public
+      # - ./src:/var/www/html/src
+    networks:
+      - indonesia-ai-network
+    healthcheck:
+      test: ["CMD", "php", "-r", "echo 'OK';"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: indonesia-ai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      # For SSL certificates (Let's Encrypt)
+      # - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - indonesia-ai-network
+    profiles:
+      - production
+
+  # MySQL Database (Optional - alternative to SQLite)
+  mysql:
+    image: mysql:8.0
+    container_name: indonesia-ai-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-indonesia_ai}
+      MYSQL_USER: ${MYSQL_USER:-indonesia_ai_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secure_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - indonesia-ai-network
+    profiles:
+      - mysql
+
+  # PostgreSQL Database (Optional - alternative to SQLite)
+  postgres:
+    image: postgres:15-alpine
+    container_name: indonesia-ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-indonesia_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-indonesia_ai_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - indonesia-ai-network
+    profiles:
+      - postgres
+
+  # Redis Cache (Optional - for session and cache storage)
+  redis:
+    image: redis:7-alpine
+    container_name: indonesia-ai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - indonesia-ai-network
+    profiles:
+      - cache
+
+networks:
+  indonesia-ai-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
