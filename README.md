@@ -10,7 +10,7 @@
 
 ## 📖 Tentang Proyek
 
-**Indonesia AI Agent** adalah aplikasi chat AI berbasis PHP dengan tampilan modern glassmorphism. Dibangun khusus untuk pengembang Indonesia dengan dokumentasi lengkap dalam Bahasa Indonesia.
+**Laks AI Agent** adalah aplikasi chat AI berbasis PHP dengan tampilan modern glassmorphism. Dibangun khusus untuk pengembang Indonesia dengan dokumentasi lengkap dalam Bahasa Indonesia.
 
 ### ✨ Fitur Utama
 
@@ -386,26 +386,6 @@ Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) unt
 
 ---
 
-## 🙏 Ucapan Terima Kasih
-
-Terima kasih kepada:
-
-- Komunitas open source PHP
-- GitHub Copilot team
-- Semua kontributor dan pengguna
-
----
-
-## 🔗 Link Penting
-
-- 📘 [Panduan Lengkap](PANDUAN.md)
-- ⚡ [Quick Start](MULAI.md)
-- 🐳 [Docker Guide](DOCKER.md)
-- 📋 [Project Roadmap](tasks/PROJECT_ROADMAP.md)
-- 🔄 [Comparison](COMPARISON.md)
-
----
-
 ## ⭐ Support
 
 Jika proyek ini membantu Anda, berikan ⭐ di GitHub!
@@ -418,9 +398,9 @@ Jika proyek ini membantu Anda, berikan ⭐ di GitHub!
 
 **Dibuat dengan ❤️ untuk Pengembang Indonesia**
 
-🇮🇩 **Indonesia AI Agent** - Memberdayakan Indonesia dengan Teknologi AI
+🇮🇩 **Laks AI Agent** - Memberdayakan Indonesia dengan Teknologi AI
 
-[Website](https://indonesiasatu.com) • 
+[Website](https://laksfaqih.my.id) • 
 [Dokumentasi](PANDUAN.md) • 
 [Quick Start](MULAI.md) • 
 [Docker](DOCKER.md)
