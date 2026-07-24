@@ -5,7 +5,7 @@
 ### 1️⃣ Buka Terminal
 
 ```bash
-cd /Users/thecodeindonesia/Agent-Ai
+cd /Users/user/Agent-Ai
 ```
 
 ### 2️⃣ Jalankan Server
@@ -30,7 +30,7 @@ http://localhost:8123/chat.html
 **Buka terminal baru** (jangan tutup server):
 
 ```bash
-cd /Users/thecodeindonesia/Agent-Ai
+cd /Users/user/Agent-Ai
 php auth.php
 ```
 

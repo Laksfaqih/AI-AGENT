@@ -609,12 +609,12 @@ try {
                     $schemaContext .= "\n2. DATA STRUCTURE ANALYSIS (if no explicit request):\n";
                     $schemaContext .= "   \n";
                     $schemaContext .= "   Use VIZ:CHART when:\n";
-                    $schemaContext .= "   - Query selects 1-3 numeric columns (e.g., sales, revenue, count)\n";
-                    $schemaContext .= "   - Query has aggregations (SUM, AVG, COUNT, MAX, MIN)\n";
-                    $schemaContext .= "   - Query has GROUP BY (comparing categories)\n";
-                    $schemaContext .= "   - Query has ORDER BY with LIMIT (top N results)\n";
+                    $schemaContext .= "   - Query returns MULTIPLE rows to compare (NOT single value!)\n";
+                    $schemaContext .= "   - Query has GROUP BY with multiple categories (comparing data)\n";
+                    $schemaContext .= "   - Query has ORDER BY with LIMIT (top N results where N > 1)\n";
                     $schemaContext .= "   - User asks for 'trends', 'comparison', 'top', 'analysis'\n";
-                    $schemaContext .= "   Examples: 'top 10 customers', 'sales by month', 'revenue comparison'\n";
+                    $schemaContext .= "   - User asks 'per bulan', 'per minggu', 'per kategori' (time series/categories)\n";
+                    $schemaContext .= "   Examples: 'top 10 customers', 'penjualan per bulan', 'revenue comparison'\n";
                     $schemaContext .= "   \n";
                     $schemaContext .= "   Use VIZ:MAP when:\n";
                     $schemaContext .= "   - Query selects location columns (city, province, address, region)\n";
@@ -623,18 +623,43 @@ try {
                     $schemaContext .= "   Examples: 'where are customers located', 'customer distribution by city'\n";
                     $schemaContext .= "   \n";
                     $schemaContext .= "   Use VIZ:TABLE when:\n";
+                    $schemaContext .= "   - Query returns SINGLE VALUE (total, sum, count without GROUP BY)\n";
+                    $schemaContext .= "   - Query has only 1 expected result row (e.g., 'berapa total X?', 'total pengeluaran bulan Y')\n";
                     $schemaContext .= "   - Query selects ALL columns (SELECT *)\n";
                     $schemaContext .= "   - Query selects many columns (>5 columns)\n";
                     $schemaContext .= "   - Query mixes text, numbers, dates, and other types\n";
                     $schemaContext .= "   - User asks to 'show all', 'list all', 'display all data'\n";
                     $schemaContext .= "   - Data is not suitable for charts or maps\n";
-                    $schemaContext .= "   Examples: 'show all customer data', 'list all products'\n";
+                    $schemaContext .= "   Examples: 'total pengeluaran bulan april', 'berapa pendapatan?', 'show all customer data'\n";
                     $schemaContext .= "\n3. EXAMPLES:\n";
-                    $schemaContext .= "   'show all customer data' → SELECT * → VIZ:TABLE (too many mixed columns)\n";
-                    $schemaContext .= "   'top 10 customers by spending' → SELECT name, total_spent LIMIT 10 → VIZ:CHART\n";
+                    $schemaContext .= "   'total pengeluaran bulan april' → SELECT SUM(amount) → VIZ:TABLE (single value!)\n";
+                    $schemaContext .= "   'berapa pendapatan hari ini?' → SELECT SUM(amount) → VIZ:TABLE (single value!)\n";
+                    $schemaContext .= "   'penjualan per bulan' → SELECT month, SUM(amount) GROUP BY month → VIZ:CHART (multiple rows)\n";
+                    $schemaContext .= "   'top 10 customers by spending' → SELECT name, total_spent LIMIT 10 → VIZ:CHART (multiple rows)\n";
                     $schemaContext .= "   'customer locations' → SELECT name, city → VIZ:MAP\n";
-                    $schemaContext .= "   'show all customer data using chart view' → SELECT * → VIZ:CHART (user override)\n";
+                    $schemaContext .= "   'show all customer data' → SELECT * → VIZ:TABLE (many columns)\n";
                     $schemaContext .= "\nDO NOT add any explanations or other text after VIZ: marker.\n";
+
+                    // Business rules untuk konteks domain spesifik
+                    $schemaContext .= "\n=== BUSINESS RULES (GRANDMA LAUNDRY) ===\n";
+                    $schemaContext .= "Definisi untuk database laundry:\n";
+                    $schemaContext .= "- 'Total penjualan' atau 'pendapatan' = SUM(payments.received_amount) - uang yang sudah diterima\n";
+                    $schemaContext .= "- 'Total order' atau 'nilai order' = SUM(orders.total) - nilai semua order termasuk belum bayar\n";
+                    $schemaContext .= "- 'Outstanding' atau 'piutang' = orders.total - SUM(payments) per order\n";
+                    $schemaContext .= "- 'Order lunas' = order dimana SUM(payments) >= orders.total\n";
+                    $schemaContext .= "- 'Order belum lunas' = order dimana SUM(payments) < orders.total\n";
+                    $schemaContext .= "- Satu order bisa punya beberapa pembayaran (cicil)\n";
+                    $schemaContext .= "- JOIN orders dengan payments menggunakan: payments.order_id = orders.id\n\n";
+
+                    // Profit/Loss rules
+                    $schemaContext .= "=== PROFIT/LOSS RULES ===\n";
+                    $schemaContext .= "- 'Laba' atau 'untung' atau 'profit' = SUM(payments.received_amount) - SUM(expenses.amount)\n";
+                    $schemaContext .= "- 'Rugi' atau 'loss' = ketika SUM(expenses.amount) > SUM(payments.received_amount)\n";
+                    $schemaContext .= "- 'Total pengeluaran' atau 'total biaya' = SUM(expenses.amount)\n";
+                    $schemaContext .= "- Untuk laporan laba rugi per periode, filter by date range pada kedua tabel\n";
+                    $schemaContext .= "- JOIN tidak diperlukan antara payments dan expenses, hitung terpisah lalu kurangi\n";
+                    $schemaContext .= "- Contoh query laba: SELECT (SELECT COALESCE(SUM(received_amount),0) FROM payments) - (SELECT COALESCE(SUM(amount),0) FROM expenses) AS laba\n\n";
+
                     $schemaContext .= "\nIf NOT a database question:\n";
                     $schemaContext .= "- Respond normally as a helpful AI assistant\n";
                     $schemaContext .= "- Do NOT generate SQL queries\n";
