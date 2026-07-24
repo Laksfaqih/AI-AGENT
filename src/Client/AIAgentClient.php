@@ -5,12 +5,6 @@ namespace PhpCopilot\Client;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-/**
- * The Code AI Agent Client
- * 
- * Powered by The Code Indonesia
- * Website: https://thecode.id
- */
 class AIAgentClient
 {
     private const COPILOT_TOKEN_URL = 'https://api.github.com/copilot_internal/v2/token';

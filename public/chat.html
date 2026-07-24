@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laks AI</title>
+    <title>Chatbot Sales Report</title>
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Leaflet.js for map visualization -->
@@ -19,8 +19,8 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
+            background: linear-gradient(180deg, #eef3f8 0%, #dfe7ef 100%);
+            color: #1f2937;
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -45,15 +45,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.72);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
             backdrop-filter: blur(20px);
             z-index: 1000;
             height: 80px;
         }
 
         h1 {
-            color: #fff;
+            color: #0f172a;
             font-size: 28px;
             font-weight: 700;
             display: flex;
@@ -143,18 +143,18 @@
         }
 
         .message.user {
-            background: rgba(255, 255, 255, 0.95);
-            color: #2d3748;
+            background: rgba(30, 58, 95, 0.96);
+            color: #f8fafc;
             margin-left: 15vw;
             border-bottom-right-radius: 5px;
         }
 
         .message.assistant {
-            background: rgba(26, 32, 44, 0.9);
-            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.96);
+            color: #1f2937;
             margin-right: 15vw;
             border-bottom-left-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
         }
 
         .message-header {
@@ -172,11 +172,11 @@
         }
 
         .message.user .message-role {
-            color: #667eea;
+            color: #cbd5f5;
         }
 
         .message.assistant .message-role {
-            color: #9f7aea;
+            color: #1d4ed8;
         }
 
         .message-meta {
@@ -224,17 +224,17 @@
             display: flex;
             gap: 0;
             flex: 1;
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.96);
+            border: 2px solid rgba(148, 163, 184, 0.22);
             border-radius: 30px;
             padding: 8px;
             transition: all 0.3s;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
         }
 
         .input-container:focus-within {
-            border-color: #fff;
-            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.3);
+            border-color: rgba(30, 58, 95, 0.35);
+            box-shadow: 0 15px 60px rgba(15, 23, 42, 0.12);
             transform: translateY(-2px);
         }
 
@@ -263,7 +263,7 @@
 
         button {
             padding: 14px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
             border: none;
             border-radius: 25px;
             color: white;
@@ -271,12 +271,12 @@
             font-size: 15px;
             font-weight: 600;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(30, 58, 95, 0.22);
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 10px 28px rgba(30, 58, 95, 0.28);
         }
 
         button:disabled {
@@ -299,11 +299,12 @@
             gap: 20px;
             justify-content: center;
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(15, 23, 42, 0.76);
             padding: 12px 30px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.72);
             backdrop-filter: blur(10px);
             z-index: 1000;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
         }
 
         .loading {
@@ -332,9 +333,9 @@
         .chart-container {
             margin-top: 20px;
             padding: 25px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.82);
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.18);
         }
 
         .chart-header {
@@ -346,7 +347,7 @@
 
         .chart-title {
             font-weight: 700;
-            color: #fff;
+            color: #0f172a;
             font-size: 16px;
         }
 
@@ -357,9 +358,9 @@
 
         .chart-type-btn {
             padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            color: #334155;
+            border: 1px solid rgba(148, 163, 184, 0.25);
             border-radius: 10px;
             cursor: pointer;
             font-size: 12px;
@@ -367,18 +368,19 @@
         }
 
         .chart-type-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(241, 245, 249, 0.96);
         }
 
         .chart-type-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
             border-color: transparent;
+            color: #fff;
         }
 
         .chart-canvas-wrapper {
             position: relative;
             height: 320px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(241, 245, 249, 0.92);
             border-radius: 12px;
             padding: 15px;
         }
@@ -386,15 +388,15 @@
         .map-container {
             margin-top: 20px;
             padding: 25px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.82);
             border-radius: 15px;
-            border: 1px solid rgba(72, 187, 120, 0.3);
+            border: 1px solid rgba(148, 163, 184, 0.18);
         }
 
         .map-wrapper {
             position: relative;
             height: 450px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(241, 245, 249, 0.92);
             border-radius: 12px;
             overflow: hidden;
         }
@@ -406,50 +408,51 @@
 
         /* Dark theme for Leaflet popups */
         .leaflet-popup-content-wrapper {
-            background: #2d3748;
-            color: #e2e8f0;
+            background: #ffffff;
+            color: #1f2937;
         }
 
         .leaflet-popup-tip {
-            background: #2d3748;
+            background: #ffffff;
         }
 
         pre {
-            background: rgba(0, 0, 0, 0.3);
+            background: #111827;
             padding: 15px;
             border-radius: 12px;
             overflow-x: auto;
             margin: 12px 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #2563eb;
         }
 
         code {
             font-family: 'Fira Code', 'Courier New', Consolas, monospace;
             font-size: 14px;
-            color: #9ae6b4;
+            color: #c7d2fe;
         }
 
         .inline-code {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(30, 58, 95, 0.08);
             padding: 3px 8px;
             border-radius: 5px;
             font-family: 'Fira Code', monospace;
             font-size: 13px;
-            color: #f6ad55;
+            color: #1e3a5f;
         }
 
         .toast {
             position: fixed;
             top: 100px;
             right: 30px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #2d3748;
+            background: rgba(255, 255, 255, 0.96);
+            color: #1f2937;
             padding: 15px 25px;
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
             animation: slideInRight 0.4s;
             z-index: 10000;
             font-weight: 500;
+            border: 1px solid rgba(148, 163, 184, 0.18);
         }
 
         @keyframes slideInRight {
@@ -465,18 +468,19 @@
         .model-badge {
             display: inline-block;
             padding: 4px 12px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(30, 58, 95, 0.08);
             border-radius: 8px;
             font-size: 11px;
             margin-left: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(30, 58, 95, 0.12);
+            color: #1e3a5f;
         }
 
         /* Hamburger Menu Styles */
         .hamburger-btn {
             padding: 14px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.82);
+            border: 2px solid rgba(148, 163, 184, 0.2);
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -489,8 +493,8 @@
         }
 
         .hamburger-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(30, 58, 95, 0.18);
             transform: rotate(90deg);
         }
 
@@ -509,10 +513,10 @@
 
         .dropdown-toggle {
             padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 25px;
-            color: #fff;
+            color: #0f172a;
             cursor: pointer;
             font-size: 15px;
             display: flex;
@@ -524,7 +528,7 @@
         }
 
         .dropdown-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.96);
             transform: translateY(-2px);
         }
 
@@ -534,11 +538,11 @@
             top: 100%;
             right: 0;
             margin-top: 10px;
-            background: rgba(26, 32, 44, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 15px;
             min-width: 240px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
             backdrop-filter: blur(20px);
             z-index: 1000;
             overflow: hidden;
@@ -551,13 +555,13 @@
 
         .dropdown-item {
             padding: 14px 20px;
-            color: #e2e8f0;
+            color: #1f2937;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
             transition: all 0.2s;
         }
 
@@ -566,7 +570,7 @@
         }
 
         .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(241, 245, 249, 0.9);
         }
 
         .dropdown-item.status-item {
@@ -589,10 +593,10 @@
             bottom: 100%;
             right: 0;
             margin-bottom: 15px;
-            background: rgba(26, 32, 44, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 20px;
-            box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 -10px 60px rgba(15, 23, 42, 0.16);
             backdrop-filter: blur(20px);
             min-width: 380px;
             max-width: 420px;
@@ -619,12 +623,12 @@
 
         .settings-dropup-header {
             padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(102, 126, 234, 0.2);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            background: rgba(30, 58, 95, 0.06);
         }
 
         .settings-dropup-header h3 {
-            color: #fff;
+            color: #0f172a;
             font-size: 16px;
             margin: 0;
             font-weight: 700;
@@ -645,7 +649,7 @@
         }
 
         .settings-group h4 {
-            color: #fff;
+            color: #0f172a;
             font-size: 13px;
             margin-bottom: 10px;
             text-transform: uppercase;
@@ -656,29 +660,29 @@
         .settings-group label {
             display: block;
             margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.7);
+            color: #64748b;
             font-size: 12px;
         }
 
         .settings-group select {
             width: 100%;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 10px;
-            color: #fff;
+            color: #1f2937;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .settings-group select:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: #fff;
         }
 
         .settings-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
         }
 
         .settings-actions {
@@ -702,7 +706,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(180deg, rgba(238, 243, 248, 0.92) 0%, rgba(223, 231, 239, 0.94) 100%);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -713,23 +717,23 @@
         }
 
         .modal {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.97);
             border-radius: 25px;
             padding: 40px;
             max-width: 450px;
             width: 90%;
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 80px rgba(15, 23, 42, 0.12);
         }
 
         .modal h2 {
-            color: #2d3748;
+            color: #0f172a;
             margin-bottom: 15px;
             font-size: 28px;
             font-weight: 700;
         }
 
         .modal p {
-            color: #718096;
+            color: #64748b;
             margin-bottom: 25px;
             font-size: 15px;
         }
@@ -741,7 +745,7 @@
         .form-group label {
             display: block;
             margin-bottom: 10px;
-            color: #2d3748;
+            color: #0f172a;
             font-size: 14px;
             font-weight: 600;
         }
@@ -749,27 +753,27 @@
         .form-group input {
             width: 100%;
             padding: 14px 18px;
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border: 2px solid #d6e0ea;
             border-radius: 12px;
-            color: #2d3748;
+            color: #1f2937;
             font-size: 15px;
             transition: all 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
             background: #fff;
         }
 
         .form-group select {
             width: 100%;
             padding: 14px 18px;
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border: 2px solid #d6e0ea;
             border-radius: 12px;
-            color: #2d3748;
+            color: #1f2937;
             font-size: 15px;
             cursor: pointer;
             transition: all 0.2s;
@@ -777,14 +781,14 @@
 
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
             background: #fff;
         }
 
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
             border: none;
             border-radius: 12px;
             color: white;
@@ -796,7 +800,7 @@
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(30, 58, 95, 0.2);
         }
 
         .btn-login:disabled {
@@ -849,20 +853,20 @@
         .github-auth-section {
             margin-top: 25px;
             padding: 25px;
-            background: #f7fafc;
+            background: #f8fbff;
             border-radius: 15px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #d9e3ec;
         }
 
         .github-auth-section h3 {
-            color: #2d3748;
+            color: #0f172a;
             margin-bottom: 12px;
             font-size: 20px;
             font-weight: 700;
         }
 
         .github-auth-section p {
-            color: #718096;
+            color: #64748b;
             margin-bottom: 18px;
             font-size: 14px;
         }
@@ -873,13 +877,13 @@
             border-radius: 12px;
             margin: 18px 0;
             text-align: center;
-            border: 2px solid #667eea;
+            border: 2px solid #2563eb;
         }
 
         .device-code {
             font-size: 28px;
             font-weight: 800;
-            color: #667eea;
+            color: #1e3a5f;
             letter-spacing: 4px;
             font-family: 'Fira Code', 'Courier New', monospace;
         }
@@ -889,12 +893,12 @@
             padding: 20px;
             border-radius: 12px;
             margin: 18px 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #2563eb;
         }
 
         .auth-instructions ol {
             margin-left: 20px;
-            color: #2d3748;
+            color: #1f2937;
         }
 
         .auth-instructions li {
@@ -905,7 +909,7 @@
         .btn-github {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
             border: none;
             border-radius: 12px;
             color: white;
@@ -921,7 +925,7 @@
 
         .btn-github:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(30, 58, 95, 0.2);
         }
 
         .btn-github:disabled {
@@ -939,8 +943,8 @@
         }
 
         .auth-status.checking {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
+            background: rgba(37, 99, 235, 0.1);
+            color: #1d4ed8;
         }
 
         .auth-status.success {
@@ -956,10 +960,10 @@
         /* Database Modal */
         .btn-small {
             padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.24);
             border-radius: 10px;
-            color: #fff;
+            color: #0f172a;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
@@ -967,7 +971,7 @@
         }
 
         .btn-small:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #fff;
             transform: translateY(-1px);
         }
 
@@ -977,17 +981,17 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.24);
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(148, 163, 184, 0.5);
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(100, 116, 139, 0.6);
         }
     </style>
 </head>
@@ -997,7 +1001,7 @@
     <div id="loginModal" class="modal-overlay active">
         <div class="modal">
             <h2>🔐 Welcome Back</h2>
-            <p>Login to access Laks AI Agent</p>
+            <p>Login to access Chatbot Sales Report</p>
 
             <div id="loginError" class="error-message" style="display: none;"></div>
 
@@ -1169,7 +1173,7 @@
 
     <div class="container" id="mainApp" style="display: none;">
         <header>
-            <h1><span class="logo">🤖</span> Laks AI Agent</h1>
+            <h1><span class="logo">🤖</span> Chatbot Sales Report</h1>
             <div class="header-controls">
                 <div class="dropdown">
                     <button class="dropdown-toggle" onclick="toggleUserDropdown()">
@@ -1198,12 +1202,10 @@
         <div id="chat" class="chat-container">
             <div class="message assistant">
                 <div class="message-header">
-                    <div class="message-role">Laks AI Agent</div>
+                    <div class="message-role">Chatbot Sales Report</div>
                     <div class="message-meta">Just now</div>
                 </div>
-                <div>Halo! 👋 Saya adalah <strong>Laks AI Agent</strong>, asisten AI cerdas yang siap membantu Anda
-                    menganalisis data, menjawab pertanyaan, dan memberikan wawasan mendalam. Ada yang bisa saya bantu
-                    hari ini?</div>
+                <div>Halo! 👋 Saya adalah <strong>Chatbot Sales Report</strong>, asisten AI cerdas yang siap membantu memantau laporan penjualan Grandma Laundry. Ada yang bisa saya bantu?</div>
             </div>
         </div>
 
@@ -1371,10 +1373,10 @@
 
             if (queryDiv.style.display === 'none') {
                 queryDiv.style.display = 'block';
-                toggleBtn.textContent = '▲ Hide Raw Query';
+                toggleBtn.textContent = 'Hide Raw Query';
             } else {
                 queryDiv.style.display = 'none';
-                toggleBtn.textContent = '▼ Show Raw Query';
+                toggleBtn.textContent = 'Show Raw Query';
             }
         }
 
@@ -1671,13 +1673,13 @@
                 });
             } else {
                 console.error('No latitude/longitude columns found. Backend should geocode location data.');
-                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #f48771;"><div>❌ No coordinates available</div></div>';
+                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #b91c1c; background: #fef2f2;"><div>No coordinates available</div></div>';
                 return;
             }
 
             if (validCount === 0) {
                 console.error('No valid coordinates found');
-                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #f48771;"><div>❌ Could not geocode any locations</div></div>';
+                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #b91c1c; background: #fef2f2;"><div>Could not geocode any locations</div></div>';
                 return;
             }
 
@@ -2153,8 +2155,8 @@
 
                         const chartId = 'chart-restore-' + index;
 
-                        contentHtml += '<div style="margin-top: 15px; padding: 15px; background: #1a472a; border-radius: 5px; border-left: 3px solid #4ec9b0;">';
-                        contentHtml += '<div style="font-weight: bold; margin-bottom: 15px;">📊 Query Results (' + msg.query_results.count + ' rows)</div>';
+                        contentHtml += '<div style="margin-top: 15px; padding: 15px; background: #f8fbff; border-radius: 10px; border: 1px solid #d8e2ed; border-left: 3px solid #2563eb; color: #1f2937;">';
+                        contentHtml += '<div style="font-weight: bold; margin-bottom: 15px; color: #0f172a;">Query Results (' + msg.query_results.count + ' rows)</div>';
 
                         // PRIORITY 1: Show visualization if data is chartable or mappable
                         if (bestChartType && msg.query_results.count > 0) {
@@ -2162,7 +2164,7 @@
                                 // Map visualization
                                 contentHtml += '<div class="map-container">';
                                 contentHtml += '<div class="chart-header">';
-                                contentHtml += '<div class="chart-title">🗺️ Map Visualization</div>';
+                                contentHtml += '<div class="chart-title">Map Visualization</div>';
                                 contentHtml += '</div>';
                                 contentHtml += '<div class="map-wrapper">';
                                 contentHtml += '<div id="' + chartId + '" style="height: 100%; width: 100%;"></div>';
@@ -2170,20 +2172,18 @@
                                 contentHtml += '</div>';
                             } else {
                                 // Determine chart icon and title
-                                let chartIcon = '📊';
+                                let chartIcon = '';
                                 let chartTitle = 'Bar Chart';
                                 if (bestChartType === 'line') {
-                                    chartIcon = '📈';
                                     chartTitle = 'Line Chart';
                                 } else if (bestChartType === 'pie') {
-                                    chartIcon = '🥧';
                                     chartTitle = 'Pie Chart';
                                 }
 
                                 // Chart visualization (shown by default)
                                 contentHtml += '<div class="chart-container">';
                                 contentHtml += '<div class="chart-header">';
-                                contentHtml += '<div class="chart-title">' + chartIcon + ' ' + chartTitle + '</div>';
+                                contentHtml += '<div class="chart-title">' + (chartIcon ? chartIcon + ' ' : '') + chartTitle + '</div>';
                                 contentHtml += '</div>';
                                 contentHtml += '<div class="chart-canvas-wrapper">';
                                 contentHtml += '<canvas id="' + chartId + '"></canvas>';
@@ -2197,13 +2197,13 @@
                         // Show table (hidden if we have a visualization)
                         if (msg.query_results.count > 0) {
                             const tableStyle = bestChartType ? 'display: none;' : '';
-                            contentHtml += '<div style="overflow-x: auto; ' + tableStyle + '"><table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+                            contentHtml += '<div style="overflow-x: auto; ' + tableStyle + '"><table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; color: #1f2937;">';
 
                             // Table header
                             const firstRow = msg.query_results.rows[0];
                             contentHtml += '<thead><tr>';
                             for (const key in firstRow) {
-                                contentHtml += '<th style="border: 1px solid #4ec9b0; padding: 8px; text-align: left; background: #2d5a3a;">' + key + '</th>';
+                                contentHtml += '<th style="border: 1px solid #d8e2ed; padding: 8px; text-align: left; background: #e8eef6; color: #334155;">' + key + '</th>';
                             }
                             contentHtml += '</tr></thead>';
 
@@ -2214,29 +2214,29 @@
                                 contentHtml += '<tr>';
                                 for (const key in row) {
                                     const value = row[key] === null ? '<em>NULL</em>' : row[key];
-                                    contentHtml += '<td style="border: 1px solid #4ec9b0; padding: 8px;">' + value + '</td>';
+                                    contentHtml += '<td style="border: 1px solid #d8e2ed; padding: 8px;">' + value + '</td>';
                                 }
                                 contentHtml += '</tr>';
                             });
                             contentHtml += '</tbody></table></div>';
 
                             if (msg.query_results.count > 100) {
-                                contentHtml += '<div style="margin-top: 10px; font-size: 11px; color: #888;">Showing first 100 of ' + msg.query_results.count + ' rows</div>';
+                                contentHtml += '<div style="margin-top: 10px; font-size: 11px; color: #64748b;">Showing first 100 of ' + msg.query_results.count + ' rows</div>';
                             }
                         } else {
-                            contentHtml += '<div style="color: #888;">No results found</div>';
+                            contentHtml += '<div style="color: #64748b;">No results found</div>';
                         }
 
                         // Add collapsible raw query section if SQL query is stored
                         if (msg.sql_query) {
                             const queryId = 'query-restore-' + index;
-                            contentHtml += '<div style="margin-top: 15px; border-top: 1px solid #2d5a3a; padding-top: 10px;">';
+                            contentHtml += '<div style="margin-top: 15px; border-top: 1px solid #d8e2ed; padding-top: 10px;">';
                             contentHtml += '<div style="display: flex; gap: 10px;">';
-                            contentHtml += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">📋 Copy</button>';
-                            contentHtml += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">▼ Show Raw Query</button>';
+                            contentHtml += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #ffffff; color: #1e3a5f; border: 1px solid #cbd5e1; border-radius: 999px; cursor: pointer; font-size: 12px;">Copy</button>';
+                            contentHtml += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #ffffff; color: #1e3a5f; border: 1px solid #cbd5e1; border-radius: 999px; cursor: pointer; font-size: 12px;">Show Raw Query</button>';
                             contentHtml += '</div>';
-                            contentHtml += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #1a1a1a; border-radius: 4px; border: 1px solid #2d5a3a;">';
-                            contentHtml += '<pre style="margin: 0; color: #4ec9b0; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + msg.sql_query.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                            contentHtml += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #111827; border-radius: 8px; border: 1px solid #1e3a5f;">';
+                            contentHtml += '<pre style="margin: 0; color: #c7d2fe; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + msg.sql_query.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
                             contentHtml += '</div>';
                             contentHtml += '</div>';
                         }
@@ -2260,7 +2260,7 @@
                         metaHtml += '<span class="model-badge">' + msg.total_tokens + ' tokens</span> ';
                     }
                     if (msg.database_context) {
-                        metaHtml += '<span class="model-badge" style="background: #1a472a; color: #4ec9b0;">🗄️ DB Context</span>';
+                        metaHtml += '<span class="model-badge" style="background: #e8f5ee; color: #2f855a;">DB Context</span>';
                     }
                 } else {
                     // Format timestamp for user messages
@@ -2274,7 +2274,7 @@
 
                 messageDiv.innerHTML = `
                     <div class="message-header">
-                        <div class="message-role">${msg.role === 'user' ? 'You' : 'Laks AI Agent'}</div>
+                        <div class="message-role">${msg.role === 'user' ? 'You' : 'Chatbot Sales Report'}</div>
                         <div class="message-meta">${metaHtml || 'Previous session'}</div>
                     </div>
                     <div class="message-content">${contentHtml}</div>
@@ -2359,7 +2359,7 @@
                 if (!data.logged_in) {
                     const copilotStatus = document.getElementById('copilotStatus');
                     if (copilotStatus) {
-                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">Not logged in</span>';
+                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #b91c1c;">Not logged in</span>';
                     }
                     return;
                 }
@@ -2376,7 +2376,7 @@
                     }
                 } else {
                     if (copilotStatus) {
-                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">Not Connected</span>';
+                        copilotStatus.innerHTML = '<span>✗</span><span style="color: #b91c1c;">Not Connected</span>';
                         copilotStatus.style.cursor = 'pointer';
                         copilotStatus.classList.remove('status-item');
                         copilotStatus.onclick = () => {
@@ -2392,7 +2392,7 @@
                 console.error('Failed to check status:', error);
                 const copilotStatus = document.getElementById('copilotStatus');
                 if (copilotStatus) {
-                    copilotStatus.innerHTML = '<span>✗</span><span style="color: #f48771;">API Error</span>';
+                    copilotStatus.innerHTML = '<span>✗</span><span style="color: #b91c1c;">API Error</span>';
                 }
                 showToast('API server not running. Start with: php -S localhost:8123 -t public', 'error');
             }
@@ -2627,7 +2627,7 @@
             input.disabled = true;
 
             // Show loading
-            const loadingId = addMessage('assistant', '<div class="loading"><div class="spinner"></div> Laks AI Agent sedang berpikir...</div>', true);
+            const loadingId = addMessage('assistant', '<div class="loading"><div class="spinner"></div> Chatbot Sales Report sedang berpikir...</div>', true);
 
             try {
                 const startTime = Date.now();
@@ -2642,7 +2642,7 @@
                 })} (${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}). Use this current date for any time-sensitive questions.]`;
 
                 // Add AI identity context
-                const identityContext = `\n\n[AI IDENTITY: You are "Laks AI Agent", an intelligent AI assistant developed by Faqih Nur Rahman. Your purpose is to help users analyze data, answer questions accurately, provide insights, and assist with database queries. You are friendly, professional, helpful, and always provide accurate information based on current context. When asked who you are, introduce yourself as "Laks AI Agent" and explain your capabilities. You communicate professionally in both Indonesian and English languages.]`;
+                const identityContext = `\n\n[AI IDENTITY: You are "Chatbot Sales Report", an intelligent AI assistant developed by Faqih Nur Rahman. Your purpose is to help users analyze data, answer questions accurately, provide insights, and assist with database queries. You are friendly, professional, helpful, and always provide accurate information based on current context. When asked who you are, introduce yourself as "Chatbot Sales Report" and explain your capabilities. You communicate professionally in both Indonesian and English languages.]`;
 
                 const messageWithContext = message + dateContext + identityContext;
 
@@ -2756,8 +2756,8 @@
 
                         console.log('Final visualization type:', bestChartType);
 
-                        messageContent += '<div style="margin-top: 15px; padding: 15px; background: #1a472a; border-radius: 5px; border-left: 3px solid #4ec9b0;">';
-                        messageContent += '<div style="font-weight: bold; margin-bottom: 15px;">📊 Query Results (' + data.query_results.count + ' rows)</div>';
+                        messageContent += '<div style="margin-top: 15px; padding: 15px; background: #f8fbff; border-radius: 10px; border: 1px solid #d8e2ed; border-left: 3px solid #2563eb; color: #1f2937;">';
+                        messageContent += '<div style="font-weight: bold; margin-bottom: 15px; color: #0f172a;">Query Results (' + data.query_results.count + ' rows)</div>';
 
                         // PRIORITY 1: Show visualization if data is chartable or mappable
                         if (bestChartType && data.query_results.count > 0) {
@@ -2765,7 +2765,7 @@
                                 // Map visualization
                                 messageContent += '<div class="map-container">';
                                 messageContent += '<div class="chart-header">';
-                                messageContent += '<div class="chart-title">🗺️ Map Visualization</div>';
+                                messageContent += '<div class="chart-title">Map Visualization</div>';
                                 messageContent += '</div>';
                                 messageContent += '<div class="map-wrapper">';
                                 messageContent += '<div id="' + chartId + '" style="height: 100%; width: 100%;"></div>';
@@ -2773,20 +2773,18 @@
                                 messageContent += '</div>';
                             } else {
                                 // Determine chart icon and title
-                                let chartIcon = '📊';
+                                let chartIcon = '';
                                 let chartTitle = 'Bar Chart';
                                 if (bestChartType === 'line') {
-                                    chartIcon = '📈';
                                     chartTitle = 'Line Chart';
                                 } else if (bestChartType === 'pie') {
-                                    chartIcon = '🥧';
                                     chartTitle = 'Pie Chart';
                                 }
 
                                 // Chart visualization (shown by default)
                                 messageContent += '<div class="chart-container">';
                                 messageContent += '<div class="chart-header">';
-                                messageContent += '<div class="chart-title">' + chartIcon + ' ' + chartTitle + '</div>';
+                                messageContent += '<div class="chart-title">' + (chartIcon ? chartIcon + ' ' : '') + chartTitle + '</div>';
                                 messageContent += '</div>';
                                 messageContent += '<div class="chart-canvas-wrapper">';
                                 messageContent += '<canvas id="' + chartId + '"></canvas>';
@@ -2796,13 +2794,13 @@
                         } else {
                             // FALLBACK: Show table only if data is not chartable
                             if (data.query_results.count > 0) {
-                                messageContent += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+                                messageContent += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; color: #1f2937;">';
 
                                 // Table header
                                 const firstRow = data.query_results.rows[0];
                                 messageContent += '<thead><tr>';
                                 for (const key in firstRow) {
-                                    messageContent += '<th style="border: 1px solid #4ec9b0; padding: 8px; text-align: left; background: #2d5a3a;">' + key + '</th>';
+                                    messageContent += '<th style="border: 1px solid #d8e2ed; padding: 8px; text-align: left; background: #e8eef6; color: #334155;">' + key + '</th>';
                                 }
                                 messageContent += '</tr></thead>';
 
@@ -2813,30 +2811,30 @@
                                     messageContent += '<tr>';
                                     for (const key in row) {
                                         const value = row[key] === null ? '<em>NULL</em>' : row[key];
-                                        messageContent += '<td style="border: 1px solid #4ec9b0; padding: 8px;">' + value + '</td>';
+                                        messageContent += '<td style="border: 1px solid #d8e2ed; padding: 8px;">' + value + '</td>';
                                     }
                                     messageContent += '</tr>';
                                 });
                                 messageContent += '</tbody></table></div>';
 
                                 if (data.query_results.count > 100) {
-                                    messageContent += '<div style="margin-top: 10px; font-size: 11px; color: #888;">Showing first 100 of ' + data.query_results.count + ' rows</div>';
+                                    messageContent += '<div style="margin-top: 10px; font-size: 11px; color: #64748b;">Showing first 100 of ' + data.query_results.count + ' rows</div>';
                                 }
                             } else {
-                                messageContent += '<div style="color: #888;">No results found</div>';
+                                messageContent += '<div style="color: #64748b;">No results found</div>';
                             }
                         }
 
                         // Add collapsible raw query section
                         if (sqlQuery) {
                             const queryId = 'query-' + Date.now();
-                            messageContent += '<div style="margin-top: 15px; border-top: 1px solid #2d5a3a; padding-top: 10px;">';
+                            messageContent += '<div style="margin-top: 15px; border-top: 1px solid #d8e2ed; padding-top: 10px;">';
                             messageContent += '<div style="display: flex; gap: 10px;">';
-                            messageContent += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">📋 Copy</button>';
-                            messageContent += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #2d5a3a; color: #4ec9b0; border: 1px solid #4ec9b0; border-radius: 4px; cursor: pointer; font-size: 12px;">▼ Show Raw Query</button>';
+                            messageContent += '<button onclick="copyQuery(\'' + queryId + '\')" style="padding: 6px 12px; background: #ffffff; color: #1e3a5f; border: 1px solid #cbd5e1; border-radius: 999px; cursor: pointer; font-size: 12px;">Copy</button>';
+                            messageContent += '<button onclick="toggleQuery(\'' + queryId + '\')" id="toggle-' + queryId + '" style="padding: 6px 12px; background: #ffffff; color: #1e3a5f; border: 1px solid #cbd5e1; border-radius: 999px; cursor: pointer; font-size: 12px;">Show Raw Query</button>';
                             messageContent += '</div>';
-                            messageContent += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #1a1a1a; border-radius: 4px; border: 1px solid #2d5a3a;">';
-                            messageContent += '<pre style="margin: 0; color: #4ec9b0; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + sqlQuery.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                            messageContent += '<div id="' + queryId + '" style="display: none; margin-top: 10px; padding: 10px; background: #111827; border-radius: 8px; border: 1px solid #1e3a5f;">';
+                            messageContent += '<pre style="margin: 0; color: #c7d2fe; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">' + sqlQuery.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
                             messageContent += '</div>';
                             messageContent += '</div>';
                         }
@@ -2898,7 +2896,7 @@
                     const metaDiv = messageEl.querySelector('.message-meta');
                     let metaHtml = `${responseTime}s <span class="model-badge">${modelUsed}</span> <span class="model-badge">${tokens} tokens</span>`;
                     if (data.database_context) {
-                        metaHtml += ' <span class="model-badge" style="background: #1a472a; color: #4ec9b0;">🗄️ DB Context</span>';
+                        metaHtml += ' <span class="model-badge" style="background: #e8f5ee; color: #2f855a;">DB Context</span>';
                     }
                     metaDiv.innerHTML = metaHtml;
 
@@ -2965,7 +2963,7 @@
             messageDiv.className = `message ${role}`;
             messageDiv.innerHTML = `
                 <div class="message-header">
-                    <div class="message-role">${role === 'user' ? 'You' : 'Laks AI Agent'}</div>
+                    <div class="message-role">${role === 'user' ? 'You' : 'Chatbot Sales Report'}</div>
                     <div class="message-meta">${isLoading ? '' : 'Just now'}</div>
                 </div>
                 <div class="message-content">${content}</div>
@@ -3032,10 +3030,10 @@
                 document.getElementById('chat').innerHTML = `
                     <div class="message assistant">
                         <div class="message-header">
-                            <div class="message-role">Laks AI Agent</div>
+                            <div class="message-role">Chatbot Sales Report</div>
                             <div class="message-meta">Just now</div>
                         </div>
-                        <div>Halo! 👋 Saya adalah <strong>Laks AI Agent</strong>, asisten AI cerdas yang siap membantu Anda menganalisis data, menjawab pertanyaan, dan memberikan wawasan mendalam. Ada yang bisa saya bantu hari ini?</div>
+                        <div>Halo! 👋 Saya adalah <strong>Chatbot Sales Report</strong>, asisten AI cerdas yang siap membantu memantau laporan penjualan Grandma Laundry. Ada yang bisa saya bantu?</div>
                     </div>
                 `;
                 updateStats();
@@ -3073,9 +3071,11 @@
             toast.textContent = message;
 
             if (type === 'error') {
-                toast.style.background = '#5a1d1d';
+                toast.style.background = '#fef2f2';
+                toast.style.color = '#b91c1c';
             } else if (type === 'success') {
-                toast.style.background = '#1a472a';
+                toast.style.background = '#e8f5ee';
+                toast.style.color = '#2f855a';
             }
 
             document.body.appendChild(toast);
@@ -3165,7 +3165,7 @@
             } catch (error) {
                 console.error('Failed to load connections:', error);
                 document.getElementById('connectionsList').innerHTML =
-                    '<div style="text-align: center; padding: 20px; color: #f48771;">Error loading connections</div>';
+                    '<div style="text-align: center; padding: 20px; color: #b91c1c; background: #fef2f2; border-radius: 8px;">Error loading connections</div>';
             }
         }
 
@@ -3174,10 +3174,10 @@
 
             if (connections.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; background: #2d2d30; border-radius: 8px; border: 2px dashed #555;">
+                    <div style="text-align: center; padding: 40px; background: #f8fbff; border-radius: 8px; border: 2px dashed #cbd5e1;">
                         <div style="font-size: 48px; margin-bottom: 10px;">🗄️</div>
-                        <div style="color: #888; font-size: 16px; margin-bottom: 5px;">No database connections yet</div>
-                        <div style="color: #666; font-size: 13px;">Click "Add New Connection" below to get started</div>
+                        <div style="color: #334155; font-size: 16px; margin-bottom: 5px;">No database connections yet</div>
+                        <div style="color: #64748b; font-size: 13px;">Click "Add New Connection" below to get started</div>
                     </div>
                 `;
                 return;
@@ -3189,35 +3189,35 @@
                 const dbTypeLabel = conn.type === 'postgres' ? 'PostgreSQL' : 'MySQL';
                 const dbTypeColor = conn.type === 'postgres' ? '#336791' : '#00758f';
                 html += `
-                    <div style="background: #2d2d30; padding: 20px; border-radius: 8px; border: 1px solid #555; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#0e639c'" onmouseout="this.style.borderColor='#555'">
+                    <div style="background: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #d8e2ed; transition: border-color 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#d8e2ed'">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                                     <div style="font-size: 18px; font-weight: 600; color: ${statusColor};">${conn.name}</div>
-                                    <div style="background: ${conn.is_active ? '#1a472a' : '#3c3c3c'}; color: ${statusColor}; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">
+                                    <div style="background: ${conn.is_active ? '#e8f5ee' : '#f1f5f9'}; color: ${statusColor}; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">
                                         ${conn.is_active ? '● Active' : '○ Inactive'}
                                     </div>
                                     <div style="background: ${dbTypeColor}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">
                                         ${dbTypeLabel}
                                     </div>
                                 </div>
-                                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 13px; color: #888;">
-                                    <div style="color: #666;">Database:</div>
-                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.database}</div>
-                                    <div style="color: #666;">Host:</div>
-                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.host}:${conn.port}</div>
-                                    <div style="color: #666;">Username:</div>
-                                    <div style="color: #d4d4d4; font-family: monospace;">${conn.username}</div>
-                                    <div style="color: #666;">Created:</div>
-                                    <div style="color: #888;">${new Date(conn.created_at).toLocaleString()}</div>
+                                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 13px; color: #64748b;">
+                                    <div style="color: #475569;">Database:</div>
+                                    <div style="color: #0f172a; font-family: monospace;">${conn.database}</div>
+                                    <div style="color: #475569;">Host:</div>
+                                    <div style="color: #0f172a; font-family: monospace;">${conn.host}:${conn.port}</div>
+                                    <div style="color: #475569;">Username:</div>
+                                    <div style="color: #0f172a; font-family: monospace;">${conn.username}</div>
+                                    <div style="color: #475569;">Created:</div>
+                                    <div style="color: #64748b;">${new Date(conn.created_at).toLocaleString()}</div>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px; margin-left: 20px;">
-                                <button class="btn-small" onclick="testConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #0e639c; color: white; border: none;">
-                                    🔌 Test
+                                <button class="btn-small" onclick="testConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #1e3a5f; color: white; border: none;">
+                                    Test
                                 </button>
-                                <button class="btn-small" onclick="deleteConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #5a1d1d; color: #f48771; border: none;">
-                                    🗑️ Delete
+                                <button class="btn-small" onclick="deleteConnection(${conn.id}, '${conn.type}')" style="padding: 8px 16px; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; box-shadow: none;">
+                                    Delete
                                 </button>
                             </div>
                         </div>
@@ -3312,17 +3312,17 @@
             resultDiv.textContent = message;
 
             if (type === 'success') {
-                resultDiv.style.background = '#1a472a';
-                resultDiv.style.color = '#4ec9b0';
-                resultDiv.style.borderLeft = '3px solid #4ec9b0';
+                resultDiv.style.background = '#e8f5ee';
+                resultDiv.style.color = '#2f855a';
+                resultDiv.style.borderLeft = '3px solid #2f855a';
             } else if (type === 'error') {
-                resultDiv.style.background = '#5a1d1d';
-                resultDiv.style.color = '#f48771';
-                resultDiv.style.borderLeft = '3px solid #f48771';
+                resultDiv.style.background = '#fef2f2';
+                resultDiv.style.color = '#b91c1c';
+                resultDiv.style.borderLeft = '3px solid #b91c1c';
             } else {
-                resultDiv.style.background = '#3c3c3c';
-                resultDiv.style.color = '#d4d4d4';
-                resultDiv.style.borderLeft = '3px solid #0e639c';
+                resultDiv.style.background = '#eff6ff';
+                resultDiv.style.color = '#1e3a5f';
+                resultDiv.style.borderLeft = '3px solid #2563eb';
             }
         }
 
